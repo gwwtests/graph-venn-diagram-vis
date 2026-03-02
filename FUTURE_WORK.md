@@ -6,22 +6,87 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 * Initialize project with Vite + TypeScript
 * Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, sigma, graphology, @memgraph/orb, react, react-dom, upsetjs/venn.js
+* Install dev/test dependencies: vitest (unit testing), tsx (CLI runner)
 * Configure build, dev server, linting
-* Create basic HTML shell with dual-panel layout placeholder
 * Set up `.gitignore` for node_modules, dist, tmp, cache
 * Create README.md with project description
+* Project structure: `src/engine/` (pure logic), `src/vis/` (visualizations), `src/cli/` (CLI)
 
-## 2. Define Master Example DAG Data [PENDING]
+## 2. Graph Engine — Pure Computation Library [PENDING]
 
-* Implement the graph data structure (domains, categories, entities, edges) in TypeScript
-* Encode the master example from `docs/design/03-example-dag-cases.md`
-* Add 1-2 additional example graphs (simpler and more complex) for user selection
-* Document each example: what cases it covers, expected path counts
-* Build a dropdown/selector UI for switching between examples
+Visualization-independent library for graph state management and propagation logic. Must be unit-testable and CLI-usable without any browser/DOM dependency.
+
+### 2a. Core data structures
+
+* `DagGraph` — typed graph: domains, categories, entities, edges
+* `GraphState` — which nodes are selected/unselected
+* Adjacency matrix representation (domain→category, category→entity)
+* Load graph from JSON definition
+
+### 2b. Computation engine
+
+* Forward propagation: selected domains → active categories → active entities
+* Path count via matrix multiplication: `domain_vector × A × B`
+* Backward propagation (deselection): identify parent domains, remove, recompute
+* `NodeState`: `{ selected: boolean, pathCount: number }`
+* Visual scaling computation: `log(1 + pathCount)` normalized to min/max range
+
+### 2c. Event processing
+
+* Event type: `{ nodeId: string, action: 'select' | 'deselect' | 'get_state' }`
+* `processEvent(graph, state, event) => newState`
+* `processEvents(graph, initialState, events[]) => finalState`
+* `get_state` returns: `{ selected: boolean, pathCount: number }` for the node
+* Pure functions — no side effects, fully deterministic
+
+### 2d. CLI interface
+
+* `npx tsx src/cli/main.ts --graph <graph.json> --state <state.json> --events <events.json>`
+* Also accept inline: `--events '[["d1","select"],["x3","get_state"]]'`
+* Output: new state as JSON to stdout
+* Useful for manual testing and scripting
+
+### 2e. Master example graphs (JSON)
+
+* Encode master example from `docs/design/03-example-dag-cases.md` as `examples/master.json`
+* Add 1-2 simpler examples for basic testing
+* Each example documents which cases it covers
+
+### 2f. Unit tests — basic infrastructure
+
+* Set up vitest
+* Write first few trivial tests:
+  * Load graph from JSON
+  * Empty state (nothing selected)
+  * Select single domain → verify propagation
+  * Path count for simple case
+* These validate the engine works before expanding test coverage
+
+### 2g. Unit tests — comprehensive edge cases (parallelizable)
+
+* **Once 2f infrastructure is working**, expand test coverage massively
+* This work CAN be parallelized with a team of agents
+* Test cases derived from `docs/design/03-example-dag-cases.md`:
+
+| Test group | Cases to cover |
+|------------|---------------|
+| Single domain select | d1 only, d2 only, d3 only — verify correct categories/entities activate |
+| Multiple domain select | d1+d2, d1+d3, d2+d3, all three — verify cumulative path counts |
+| Entity deselection | Deselect x3 (multi-parent) — verify parent domains deselected, recomputation |
+| Category deselection | Deselect c2 (shared across d1,d2) — verify both parent domains affected |
+| Domain deselection | Deselect d1 from d1+d2 — verify only d2 paths remain |
+| Isolated paths | x5→c4→d3 — single path, select/deselect d3 |
+| Cross-domain entity | x6→{c3,c4} spans d1+d3 — verify path counts from each domain |
+| Shared category | c2 shared by d1,d2 — select d1 vs d2 vs both, verify x3,x4 path counts |
+| Sequential events | Chain of select/deselect operations, verify intermediate and final states |
+| get_state queries | Query node state at various points, verify pathCount values |
+| Edge cases | Empty graph, all selected, all deselected, select already-selected, deselect already-deselected |
+| Path count math | Verify matrix multiplication matches hand-computed values from design doc |
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try all seven approaches, compare, keep best (or multiple as selectable modes):
+Try all seven approaches, compare, keep best (or multiple as selectable modes).
+All implementations consume the engine from step 2 — no computation logic in visualization code.
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -79,14 +144,13 @@ Try all seven approaches, compare, keep best (or multiple as selectable modes):
 * npm: `@memgraph/orb`
 * Blog: https://memgraph.com/blog/how-to-build-a-graph-visualization-engine-and-why-you-shouldnt
 
-### Shared requirements (all implementations)
+### Shared requirements (all visualization implementations)
 
+* Consume `DagGraph` and `GraphState` from engine (step 2)
 * Node styling: selected vs unselected states (color, size, opacity, border)
 * Edge styling: active vs inactive (opacity, thickness, color)
-* Click interaction: flip node state, trigger propagation
-* Selection propagation logic (forward/backward as per `04-selection-propagation.md`)
-* Path count computation via adjacency matrix multiplication
-* Visual scaling: node size and saturation based on log-normalized path counts
+* Click interaction: call `processEvent()` from engine, re-render with new state
+* Visual scaling: node size and saturation based on engine's log-normalized path counts
 * Display path count numbers on nodes
 
 ## 4. Venn Diagram Visualization [PENDING]
@@ -94,7 +158,7 @@ Try all seven approaches, compare, keep best (or multiple as selectable modes):
 * Implement upsetjs/venn.js-based Venn renderer
 * Map DAG data to set definitions (categories or domains as sets, entities as members)
 * Interactive regions: click to select/deselect sets
-* Same selection propagation logic synced with DAG data model
+* Same engine (step 2) for propagation logic
 * Visual states matching DAG: selected vs unselected regions
 * Explore multiple Venn visualization modes (by domain, by category)
 * Evaluate if UpSet plot mode is needed for many-set cases
@@ -110,7 +174,7 @@ Try all seven approaches, compare, keep best (or multiple as selectable modes):
 ## 6. Dual-Panel Synchronized View [PENDING]
 
 * Implement adaptive split layout (see `docs/design/02-adaptive-split-layout.md`)
-* Wire both panels to shared data model
+* Wire both panels to shared engine state
 * Selection in DAG panel updates Venn panel and vice versa
 * Visualization mode selectors in each panel (switch between renderers)
 * Responsive resize handling
