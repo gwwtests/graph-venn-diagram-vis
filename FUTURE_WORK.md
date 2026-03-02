@@ -5,7 +5,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 ## 1. Setup Repository [PENDING]
 
 * Initialize project with Vite + TypeScript
-* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, upsetjs/venn.js
+* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, react, react-dom, upsetjs/venn.js
 * Configure build, dev server, linting
 * Create basic HTML shell with dual-panel layout placeholder
 * Set up `.gitignore` for node_modules, dist, tmp, cache
@@ -21,7 +21,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try all four approaches, compare, keep best (or multiple as selectable modes):
+Try all five approaches, compare, keep best (or multiple as selectable modes):
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -49,6 +49,15 @@ Try all four approaches, compare, keep best (or multiple as selectable modes):
 * Same D3 ecosystem as upsetjs/venn.js — consistent event model across both panels
 * More upfront code, but graph is small (14 nodes)
 * Also consider d3-graphviz (DOT input, Graphviz WASM) as sub-variant
+
+### 3e. reagraph (reaviz, WebGL)
+
+* Apache-2.0 license, actively maintained (v4.30.x, Dec 2025)
+* WebGL via Three.js — 2D and 3D modes
+* Built-in `HierarchicalTopDown2D`, `TreeTopDown2D` layouts
+* Built-in clustering, label overlap resolution, animated transitions
+* React-based — requires React dependency
+* npm: `reagraph`
 
 ### Shared requirements (all implementations)
 

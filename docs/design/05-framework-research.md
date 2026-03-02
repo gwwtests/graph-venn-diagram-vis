@@ -15,7 +15,7 @@
 | **ELK.js** | EPL-2.0 | 2.1k | Yes | Best-in-class | N/A (no renderer) | Layout engine (license concern) |
 | **Cola.js** | MIT | 2k | Inactive | Not hierarchical | Via adapters | ★☆☆☆☆ |
 | **force-graph** | MIT | 1.9k (+5k react) | Yes (2025) | Native `dagMode` | Canvas 2D, zero-config DAG | ★★★★☆ |
-| **reagraph** | Apache-2.0 | ~1k | Yes (2025) | Built-in hierarchical | WebGL (Three.js), React-only | ★★★☆☆ |
+| **reagraph** | Apache-2.0 | ~1k | Yes (2025) | Built-in hierarchical | WebGL (Three.js), React | ★★★★☆ |
 | **@antv/x6** | MIT | 6.5k | Yes (2026) | Via @antv/layout (dagre) | SVG, diagram editor SDK | ★★★☆☆ |
 | **@logicflow/core** | Apache-2.0 | 11.2k | Yes (2026) | Built-in + dagre ext | SVG, workflow/BPMN focused | ★★☆☆☆ |
 
@@ -74,6 +74,18 @@
 * npm: `force-graph` (vanilla), `react-force-graph` (React wrapper)
 * Limitation: less compound-graph styling than Cytoscape; Canvas = no SVG DOM
 
+### Strong candidate: reagraph (reaviz)
+
+* **Apache-2.0** license, actively maintained (v4.30.x, Dec 2025)
+* WebGL rendering via Three.js — smooth performance, 2D and 3D modes
+* Built-in hierarchical layouts: `HierarchicalTopDown2D`, `HierarchicalLeftRight2D`, `TreeTopDown2D`, `TreeLeftRight2D`
+* Built-in clustering, label overlap resolution, animated transitions
+* Node/edge selection API, context menus
+* React-based — requires React as a dependency
+* npm: `reagraph`
+* Maintained by Good Code US (commercial org), ensuring stability
+* ~1k stars but growing; part of the reaviz visualization ecosystem
+
 ### Runner-up: G6 (AntV) v5
 
 * MIT, good built-in features
@@ -82,7 +94,6 @@
 
 ### Also evaluated (lower fit for our use case)
 
-* **reagraph** (Apache-2.0, ~1k stars) — WebGL via Three.js, built-in `HierarchicalTopDown2D`, but React-only
 * **@antv/x6** (MIT, 6.5k stars) — full diagramming/editor SDK with dagre layout, rich edge routing, undo/redo, minimap — heavier than we need, editor-oriented rather than pure visualization
 * **@logicflow/core** (Apache-2.0, 11.2k stars) — workflow/BPMN engine from DiDi, highest star count but domain-specific (workflow simulation), Chinese-primary docs
 * **neovis.js** (Apache-2.0, 1.8k stars) — thin wrapper around vis-network for Neo4j graph databases. Tightly coupled to Neo4j Bolt record format (`neo4j-driver` is a hard dependency); even standalone `dataFunction` mode requires mimicking Neo4j wire protocol, not simple `{nodes, edges}` JSON. Unmaintained since May 2023 (no releases in 2024-2025, ~600 weekly npm downloads). No value beyond using vis-network directly, which we already have as candidate 3b
@@ -113,26 +124,29 @@
 ## Recommended Stack
 
 ```
-DAG (try all four, compare):
+DAG (try all five, compare):
   1. Cytoscape.js + cytoscape-dagre  (richer styling, compound nodes)
   2. vis-network (hierarchical mode)  (simpler, existing Tripleter reference)
   3. force-graph (dagMode: 'td')      (minimal API, Canvas, D3-based internally)
   4. D3.js + d3-dag (manual SVG)      (full control, same ecosystem as venn.js)
+  5. reagraph (WebGL, hierarchical)   (Apache-2.0, 2D+3D, React-based)
 Venn:      upsetjs/venn.js (≤5 sets)
 Bundler:   Vite (fast dev, simple config)
 Language:  TypeScript (type safety for graph data structures)
+UI:        React (needed for reagraph; other candidates work standalone or with React)
 ```
 
-### Why try four DAG approaches
+### Why try five DAG approaches
 
 * **Cytoscape.js**: richest styling API (CSS-like selectors), compound nodes, graph algorithms built-in
 * **vis-network**: simpler API, reactive DataSet, working Tripleter reference codebase
 * **force-graph**: most minimal API, native `dagMode` with zero config, Canvas rendering, directional edge particles
 * **D3.js + d3-dag**: full control, SVG, same D3 ecosystem as upsetjs/venn.js (consistent event model across both panels)
-* All four permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
+* **reagraph**: Apache-2.0, WebGL via Three.js, built-in hierarchical layouts, 2D+3D modes, clustering, commercially maintained
+* All five permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
 * Trying all lets us compare and pick the best fit (or offer multiple as visualization modes)
-* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 4 DAG candidates + the Venn lib share D3 foundations
-* No framework lock-in (vanilla JS/TS, not React-specific)
+* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 5 DAG candidates + the Venn lib share D3 foundations
+* React added to stack for reagraph; other candidates work with or without React
 
 ## Sources
 
