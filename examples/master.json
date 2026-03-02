@@ -1,0 +1,42 @@
+{
+  "domains": [
+    { "id": "d1", "label": "Engineering" },
+    { "id": "d2", "label": "Science" },
+    { "id": "d3", "label": "Arts" }
+  ],
+  "categories": [
+    { "id": "c1", "label": "Software" },
+    { "id": "c2", "label": "Data" },
+    { "id": "c3", "label": "Hardware" },
+    { "id": "c4", "label": "Design" },
+    { "id": "c5", "label": "Research" }
+  ],
+  "entities": [
+    { "id": "x1", "label": "Entity1" },
+    { "id": "x2", "label": "Entity2" },
+    { "id": "x3", "label": "Entity3" },
+    { "id": "x4", "label": "Entity4" },
+    { "id": "x5", "label": "Entity5" },
+    { "id": "x6", "label": "Entity6" }
+  ],
+  "domainToCategory": [
+    { "from": "d1", "to": "c1" },
+    { "from": "d1", "to": "c2" },
+    { "from": "d1", "to": "c3" },
+    { "from": "d2", "to": "c2" },
+    { "from": "d2", "to": "c5" },
+    { "from": "d3", "to": "c4" }
+  ],
+  "categoryToEntity": [
+    { "from": "c1", "to": "x1" },
+    { "from": "c1", "to": "x2" },
+    { "from": "c1", "to": "x3" },
+    { "from": "c2", "to": "x3" },
+    { "from": "c2", "to": "x4" },
+    { "from": "c3", "to": "x2" },
+    { "from": "c3", "to": "x6" },
+    { "from": "c4", "to": "x5" },
+    { "from": "c4", "to": "x6" },
+    { "from": "c5", "to": "x4" }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "domains": [{ "id": "d1", "label": "Domain1" }],
+  "categories": [{ "id": "c1", "label": "Cat1" }],
+  "entities": [{ "id": "x1", "label": "Entity1" }],
+  "domainToCategory": [{ "from": "d1", "to": "c1" }],
+  "categoryToEntity": [{ "from": "c1", "to": "x1" }]
+}
