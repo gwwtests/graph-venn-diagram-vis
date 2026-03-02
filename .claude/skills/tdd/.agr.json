@@ -1,0 +1,8 @@
+{
+  "id": "remote:github:mattpocock/skills/tdd",
+  "tool": "claude",
+  "installed_name": "tdd",
+  "type": "remote",
+  "handle": "mattpocock/skills/tdd",
+  "source": "github"
+}
