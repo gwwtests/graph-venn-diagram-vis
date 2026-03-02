@@ -21,7 +21,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try both approaches, compare, keep best (or both as selectable modes):
+Try all three approaches, compare, keep best (or multiple as selectable modes):
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -35,7 +35,14 @@ Try both approaches, compare, keep best (or both as selectable modes):
 * Reactive `vis.DataSet` for automatic re-renders
 * Reference: Tripleter codebase (`/mnt/ro/github/tripleter/tripleter.github.io/static/vis/v5/`)
 
-### Shared requirements (both implementations)
+### 3c. force-graph (vasturiano, dagMode)
+
+* Native `dagMode: 'td'` — zero-config top-down DAG layout
+* Canvas 2D rendering, minimal API surface
+* Directional particles on edges (visual flow)
+* npm: `force-graph`
+
+### Shared requirements (all implementations)
 
 * Node styling: selected vs unselected states (color, size, opacity, border)
 * Edge styling: active vs inactive (opacity, thickness, color)
