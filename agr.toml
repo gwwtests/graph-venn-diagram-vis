@@ -1,0 +1,9 @@
+default_source = "github"
+dependencies = [
+    {handle = "mattpocock/skills/tdd", type = "skill"},
+]
+
+[[source]]
+name = "github"
+type = "git"
+url = "https://github.com/{owner}/{repo}.git"
