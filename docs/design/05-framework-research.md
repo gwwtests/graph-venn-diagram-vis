@@ -8,7 +8,8 @@
 | **G6 (AntV) v5** | MIT | 12k | Yes (v5, 2025) | Built-in dagre | Excellent built-in | ★★★★☆ |
 | **React Flow** | MIT | 24k | Yes | Via dagre/ELK plugins | Excellent (React) | ★★★★☆ |
 | **vis-network** | Apache-2.0/MIT | 3.2k | Yes (2025) | Built-in hierarchical | Good | ★★★★☆ |
-| **D3.js + d3-dag** | BSD-3 / MIT | 112k | Yes / light | Via d3-dag plugin | Manual (full control) | ★★☆☆☆ |
+| **D3.js + d3-dag** | BSD-3 / MIT | 112k | Yes / light | Sugiyama via d3-dag | Manual (full control) | ★★★★☆ |
+| **d3-graphviz** | BSD-3 | 1.8k | Yes (v5.6, 2025) | 7 Graphviz algos (dot=hierarchical) | D3 transitions, SVG | ★★★☆☆ |
 | **Sigma.js v3** | MIT | 11.6k | Yes (2024) | Needs external layout | Good | ★★★☆☆ |
 | **dagre** | MIT | 5.1k | Stale/revived | Core purpose (layout only) | N/A (no renderer) | Layout engine |
 | **ELK.js** | EPL-2.0 | 2.1k | Yes | Best-in-class | N/A (no renderer) | Layout engine (license concern) |
@@ -39,6 +40,27 @@
   * Uses force-directed `forceAtlas2Based` physics, but hierarchical mode available
 * Lower learning curve than Cytoscape.js — simpler API
 * Limitation: less flexible styling than Cytoscape's CSS-like selectors
+
+### Strong candidate: D3.js + d3-dag (manual SVG rendering)
+
+* D3.js: BSD-3, 112k stars — the foundational web visualization library
+* d3-dag: MIT, ~900 stars — Sugiyama layered layout for DAGs
+* Full control: hand-code every SVG element, transition, interaction
+* **Same D3 ecosystem as upsetjs/venn.js** — consistent event model, selections, transitions across both panels
+* SVG rendering: inspectable DOM, CSS-styleable, accessible
+* No abstraction tax — nothing hidden, no framework opinions
+* More upfront code than higher-level libs, but our graph is small (14 nodes)
+* Sugiyama layout algorithms: `sugiyama()`, `zherebko()`, `grid()`
+* Note: `force-graph` (vasturiano) is also D3-based internally (d3-force-3d, d3-drag, d3-zoom, d3-selection)
+
+### D3 ecosystem note: d3-graphviz
+
+* BSD-3, 1.8k stars, 29k weekly npm downloads, active (v5.6, March 2025)
+* Uses Graphviz WASM for layout — 7 algorithms including `dot` (hierarchical DAG)
+* SVG output with D3-powered animated transitions between graph states
+* Input is DOT language (not JSON) — requires generating DOT strings from our data model
+* 3MB WASM bundle adds weight
+* Could be an alternative if we want Graphviz-quality edge routing
 
 ### Strong candidate: force-graph (vasturiano)
 
@@ -90,23 +112,25 @@
 ## Recommended Stack
 
 ```
-DAG (try all three, compare):
+DAG (try all four, compare):
   1. Cytoscape.js + cytoscape-dagre  (richer styling, compound nodes)
   2. vis-network (hierarchical mode)  (simpler, existing Tripleter reference)
-  3. force-graph (dagMode: 'td')      (minimal API, Canvas, zero-config DAG)
+  3. force-graph (dagMode: 'td')      (minimal API, Canvas, D3-based internally)
+  4. D3.js + d3-dag (manual SVG)      (full control, same ecosystem as venn.js)
 Venn:      upsetjs/venn.js (≤5 sets)
 Bundler:   Vite (fast dev, simple config)
 Language:  TypeScript (type safety for graph data structures)
 ```
 
-### Why try three DAG approaches
+### Why try four DAG approaches
 
 * **Cytoscape.js**: richest styling API (CSS-like selectors), compound nodes, graph algorithms built-in
 * **vis-network**: simpler API, reactive DataSet, working Tripleter reference codebase
 * **force-graph**: most minimal API, native `dagMode` with zero config, Canvas rendering, directional edge particles
-* All three MIT/Apache licensed, all support hierarchical/DAG layout
-* Trying all three lets us compare and pick the best fit (or offer multiple as visualization modes)
-* upsetjs/venn.js works orthogonally with any of them
+* **D3.js + d3-dag**: full control, SVG, same D3 ecosystem as upsetjs/venn.js (consistent event model across both panels)
+* All four permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
+* Trying all lets us compare and pick the best fit (or offer multiple as visualization modes)
+* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 4 DAG candidates + the Venn lib share D3 foundations
 * No framework lock-in (vanilla JS/TS, not React-specific)
 
 ## Sources
@@ -122,3 +146,5 @@ Language:  TypeScript (type safety for graph data structures)
 * [upsetjs/venn.js](https://github.com/upsetjs/venn.js) — MIT
 * [dagre](https://github.com/dagrejs/dagre) — MIT, 5.1k stars
 * [ELK.js](https://github.com/kieler/elkjs) — EPL-2.0, 2.1k stars
+* [d3-dag](https://github.com/erikbrinkman/d3-dag) — MIT, ~900 stars
+* [d3-graphviz](https://github.com/magjac/d3-graphviz) — BSD-3, 1.8k stars

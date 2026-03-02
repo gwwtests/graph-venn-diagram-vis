@@ -5,7 +5,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 ## 1. Setup Repository [PENDING]
 
 * Initialize project with Vite + TypeScript
-* Install core dependencies: Cytoscape.js, cytoscape-dagre, upsetjs/venn.js, D3 (for venn)
+* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, upsetjs/venn.js
 * Configure build, dev server, linting
 * Create basic HTML shell with dual-panel layout placeholder
 * Set up `.gitignore` for node_modules, dist, tmp, cache
@@ -21,7 +21,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try all three approaches, compare, keep best (or multiple as selectable modes):
+Try all four approaches, compare, keep best (or multiple as selectable modes):
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -41,6 +41,14 @@ Try all three approaches, compare, keep best (or multiple as selectable modes):
 * Canvas 2D rendering, minimal API surface
 * Directional particles on edges (visual flow)
 * npm: `force-graph`
+
+### 3d. D3.js + d3-dag (manual SVG rendering)
+
+* d3-dag Sugiyama layout for hierarchical DAG positioning
+* Manual D3 SVG rendering — full control over every element
+* Same D3 ecosystem as upsetjs/venn.js — consistent event model across both panels
+* More upfront code, but graph is small (14 nodes)
+* Also consider d3-graphviz (DOT input, Graphviz WASM) as sub-variant
 
 ### Shared requirements (all implementations)
 
