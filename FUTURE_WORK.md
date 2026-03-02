@@ -5,7 +5,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 ## 1. Setup Repository [PENDING]
 
 * Initialize project with Vite + TypeScript
-* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, react, react-dom, upsetjs/venn.js
+* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, sigma, graphology, react, react-dom, upsetjs/venn.js
 * Configure build, dev server, linting
 * Create basic HTML shell with dual-panel layout placeholder
 * Set up `.gitignore` for node_modules, dist, tmp, cache
@@ -21,7 +21,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try all five approaches, compare, keep best (or multiple as selectable modes):
+Try all six approaches, compare, keep best (or multiple as selectable modes):
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -58,6 +58,15 @@ Try all five approaches, compare, keep best (or multiple as selectable modes):
 * Built-in clustering, label overlap resolution, animated transitions
 * React-based — requires React dependency
 * npm: `reagraph`
+
+### 3f. Sigma.js v3 + graphology + dagre
+
+* MIT license, 11.6k stars, WebGL rendering
+* graphology data model — flexible graph data structure
+* Layout computed externally (dagre for hierarchical), positions applied to Sigma
+* Node/edge reducers for dynamic per-frame styling
+* Best-in-class performance (100k+ nodes) — overkill for us but visually smooth
+* npm: `sigma`, `graphology`
 
 ### Shared requirements (all implementations)
 

@@ -10,7 +10,7 @@
 | **vis-network** | Apache-2.0/MIT | 3.2k | Yes (2025) | Built-in hierarchical | Good | ★★★★☆ |
 | **D3.js + d3-dag** | BSD-3 / MIT | 112k | Yes / light | Sugiyama via d3-dag | Manual (full control) | ★★★★☆ |
 | **d3-graphviz** | BSD-3 | 1.8k | Yes (v5.6, 2025) | 7 Graphviz algos (dot=hierarchical) | D3 transitions, SVG | ★★★☆☆ |
-| **Sigma.js v3** | MIT | 11.6k | Yes (2024) | Needs external layout | Good | ★★★☆☆ |
+| **Sigma.js v3** | MIT | 11.6k | Yes (2024) | Via graphology-layout + dagre | WebGL, 100k+ nodes | ★★★★☆ |
 | **dagre** | MIT | 5.1k | Stale/revived | Core purpose (layout only) | N/A (no renderer) | Layout engine |
 | **ELK.js** | EPL-2.0 | 2.1k | Yes | Best-in-class | N/A (no renderer) | Layout engine (license concern) |
 | **Cola.js** | MIT | 2k | Inactive | Not hierarchical | Via adapters | ★☆☆☆☆ |
@@ -86,6 +86,19 @@
 * Maintained by Good Code US (commercial org), ensuring stability
 * ~1k stars but growing; part of the reaviz visualization ecosystem
 
+### Strong candidate: Sigma.js v3
+
+* MIT license, 11.6k stars, actively maintained (v3, 2024)
+* **WebGL rendering** — best-in-class performance, handles 100k+ nodes at 60fps
+* Uses **graphology** as data model (graph data structure library, MIT)
+* Layout via external libraries: `graphology-layout-forceatlas2`, `graphology-layout-noverlap`, or dagre positions applied manually
+* For hierarchical DAG: compute layout with dagre, set node x/y, render with Sigma
+* Built-in interactivity: click, hover, zoom, pan, node/edge events
+* Node/edge reducers for dynamic styling (size, color, opacity per render frame)
+* npm: `sigma`, `graphology`, `graphology-layout-forceatlas2`
+* More setup needed than single-lib solutions (layout is separate) but very flexible
+* Great for visually impressive, high-performance graph rendering
+
 ### Runner-up: G6 (AntV) v5
 
 * MIT, good built-in features
@@ -124,28 +137,30 @@
 ## Recommended Stack
 
 ```
-DAG (try all five, compare):
+DAG (try all six, compare):
   1. Cytoscape.js + cytoscape-dagre  (richer styling, compound nodes)
   2. vis-network (hierarchical mode)  (simpler, existing Tripleter reference)
   3. force-graph (dagMode: 'td')      (minimal API, Canvas, D3-based internally)
   4. D3.js + d3-dag (manual SVG)      (full control, same ecosystem as venn.js)
   5. reagraph (WebGL, hierarchical)   (Apache-2.0, 2D+3D, React-based)
+  6. Sigma.js v3 + graphology + dagre (WebGL, high-perf, MIT)
 Venn:      upsetjs/venn.js (≤5 sets)
 Bundler:   Vite (fast dev, simple config)
 Language:  TypeScript (type safety for graph data structures)
 UI:        React (needed for reagraph; other candidates work standalone or with React)
 ```
 
-### Why try five DAG approaches
+### Why try six DAG approaches
 
 * **Cytoscape.js**: richest styling API (CSS-like selectors), compound nodes, graph algorithms built-in
 * **vis-network**: simpler API, reactive DataSet, working Tripleter reference codebase
 * **force-graph**: most minimal API, native `dagMode` with zero config, Canvas rendering, directional edge particles
 * **D3.js + d3-dag**: full control, SVG, same D3 ecosystem as upsetjs/venn.js (consistent event model across both panels)
 * **reagraph**: Apache-2.0, WebGL via Three.js, built-in hierarchical layouts, 2D+3D modes, clustering, commercially maintained
-* All five permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
+* **Sigma.js v3**: MIT, WebGL rendering, 11.6k stars, best performance (100k+ nodes), graphology data model, flexible styling via node/edge reducers
+* All six permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
 * Trying all lets us compare and pick the best fit (or offer multiple as visualization modes)
-* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 5 DAG candidates + the Venn lib share D3 foundations
+* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 6 DAG candidates + the Venn lib share D3 foundations
 * React added to stack for reagraph; other candidates work with or without React
 
 ## Sources
@@ -163,3 +178,5 @@ UI:        React (needed for reagraph; other candidates work standalone or with 
 * [ELK.js](https://github.com/kieler/elkjs) — EPL-2.0, 2.1k stars
 * [d3-dag](https://github.com/erikbrinkman/d3-dag) — MIT, ~900 stars
 * [d3-graphviz](https://github.com/magjac/d3-graphviz) — BSD-3, 1.8k stars
+* [Sigma.js](https://github.com/jacomyal/sigma.js) — MIT, 11.6k stars
+* [graphology](https://github.com/graphology/graphology) — MIT
