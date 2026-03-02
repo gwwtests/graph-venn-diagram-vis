@@ -17,4 +17,22 @@ describe('processGraph', () => {
     expect(result.outputs).toEqual([]);
     expect(result.state.selectedDomains.size).toBe(0);
   });
+
+  it('selects a domain and propagates to category and entity', () => {
+    const result = processGraph(trivialGraph, createEmptyState(), [
+      { nodeId: 'd1', action: 'select' },
+    ]);
+    expect(result.state.selectedDomains).toEqual(new Set(['d1']));
+    // get_state to check propagation
+    const result2 = processGraph(trivialGraph, result.state, [
+      { nodeId: 'd1', action: 'get_state' },
+      { nodeId: 'c1', action: 'get_state' },
+      { nodeId: 'x1', action: 'get_state' },
+    ]);
+    expect(result2.outputs).toEqual([
+      { nodeId: 'd1', selected: true, pathCount: 1 },
+      { nodeId: 'c1', selected: true, pathCount: 1 },
+      { nodeId: 'x1', selected: true, pathCount: 1 },
+    ]);
+  });
 });
