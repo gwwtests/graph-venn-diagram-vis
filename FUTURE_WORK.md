@@ -5,7 +5,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 ## 1. Setup Repository [PENDING]
 
 * Initialize project with Vite + TypeScript
-* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, sigma, graphology, react, react-dom, upsetjs/venn.js
+* Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, sigma, graphology, @memgraph/orb, react, react-dom, upsetjs/venn.js
 * Configure build, dev server, linting
 * Create basic HTML shell with dual-panel layout placeholder
 * Set up `.gitignore` for node_modules, dist, tmp, cache
@@ -21,7 +21,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-Try all six approaches, compare, keep best (or multiple as selectable modes):
+Try all seven approaches, compare, keep best (or multiple as selectable modes):
 
 ### 3a. Cytoscape.js + cytoscape-dagre
 
@@ -67,6 +67,17 @@ Try all six approaches, compare, keep best (or multiple as selectable modes):
 * Node/edge reducers for dynamic per-frame styling
 * Best-in-class performance (100k+ nodes) — overkill for us but visually smooth
 * npm: `sigma`, `graphology`
+
+### 3g. @memgraph/orb + dagre (WebWorker physics)
+
+* Apache-2.0 license, TypeScript-first, Canvas rendering
+* D3-based internally (d3-force, d3-drag, d3-zoom)
+* WebWorker off-main-thread physics simulation (unique architectural feature)
+* No built-in hierarchical layout — apply dagre positions via `getPosition()` callback
+* Standalone — no Memgraph DB required, accepts plain `{nodes, edges}` JSON
+* MapView via Leaflet (bonus: geographic overlay)
+* npm: `@memgraph/orb`
+* Blog: https://memgraph.com/blog/how-to-build-a-graph-visualization-engine-and-why-you-shouldnt
 
 ### Shared requirements (all implementations)
 

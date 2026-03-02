@@ -18,6 +18,7 @@
 | **reagraph** | Apache-2.0 | ~1k | Yes (2025) | Built-in hierarchical | WebGL (Three.js), React | ★★★★☆ |
 | **@antv/x6** | MIT | 6.5k | Yes (2026) | Via @antv/layout (dagre) | SVG, diagram editor SDK | ★★★☆☆ |
 | **@logicflow/core** | Apache-2.0 | 11.2k | Yes (2026) | Built-in + dagre ext | SVG, workflow/BPMN focused | ★★☆☆☆ |
+| **@memgraph/orb** | Apache-2.0 | 417 | Stalled (Feb 2024) | No (force-directed only) | Canvas, WebWorker physics | ★★★☆☆ |
 
 ### Top Pick: Cytoscape.js
 
@@ -99,6 +100,19 @@
 * More setup needed than single-lib solutions (layout is separate) but very flexible
 * Great for visually impressive, high-performance graph rendering
 
+### Notable: @memgraph/orb
+
+* **Apache-2.0** license, 417 stars, TypeScript-first
+* Canvas rendering, D3-based internally (d3-force, d3-drag, d3-zoom)
+* **Standalone** — no Memgraph DB required, accepts plain `{nodes, edges}` JSON
+* **WebWorker physics** — force simulation runs off-main-thread (unique architectural differentiator vs. all other libs)
+* MapView via Leaflet (overlay graph on geographic map tiles)
+* Style-per-element API, typed generics: `Orb<NodeData, EdgeData>`
+* **No hierarchical/DAG layout** natively — force-directed only, but accepts pre-computed `{x, y}` positions (so dagre layout could be applied externally)
+* Stalled since Feb 2024 (v0.4.3, pre-1.0), ~288 weekly npm downloads
+* Insightful blog post on architecture decisions: [How to Build a Graph Visualization Engine](https://memgraph.com/blog/how-to-build-a-graph-visualization-engine-and-why-you-shouldnt)
+* npm: `@memgraph/orb`
+
 ### Runner-up: G6 (AntV) v5
 
 * MIT, good built-in features
@@ -137,20 +151,21 @@
 ## Recommended Stack
 
 ```
-DAG (try all six, compare):
+DAG (try all seven, compare):
   1. Cytoscape.js + cytoscape-dagre  (richer styling, compound nodes)
   2. vis-network (hierarchical mode)  (simpler, existing Tripleter reference)
   3. force-graph (dagMode: 'td')      (minimal API, Canvas, D3-based internally)
   4. D3.js + d3-dag (manual SVG)      (full control, same ecosystem as venn.js)
   5. reagraph (WebGL, hierarchical)   (Apache-2.0, 2D+3D, React-based)
   6. Sigma.js v3 + graphology + dagre (WebGL, high-perf, MIT)
+  7. @memgraph/orb + dagre            (Apache-2.0, Canvas, WebWorker physics)
 Venn:      upsetjs/venn.js (≤5 sets)
 Bundler:   Vite (fast dev, simple config)
 Language:  TypeScript (type safety for graph data structures)
 UI:        React (needed for reagraph; other candidates work standalone or with React)
 ```
 
-### Why try six DAG approaches
+### Why try seven DAG approaches
 
 * **Cytoscape.js**: richest styling API (CSS-like selectors), compound nodes, graph algorithms built-in
 * **vis-network**: simpler API, reactive DataSet, working Tripleter reference codebase
@@ -158,9 +173,10 @@ UI:        React (needed for reagraph; other candidates work standalone or with 
 * **D3.js + d3-dag**: full control, SVG, same D3 ecosystem as upsetjs/venn.js (consistent event model across both panels)
 * **reagraph**: Apache-2.0, WebGL via Three.js, built-in hierarchical layouts, 2D+3D modes, clustering, commercially maintained
 * **Sigma.js v3**: MIT, WebGL rendering, 11.6k stars, best performance (100k+ nodes), graphology data model, flexible styling via node/edge reducers
-* All six permissively licensed (MIT/Apache/BSD), all support hierarchical/DAG layout
+* **@memgraph/orb**: Apache-2.0, Canvas, WebWorker off-main-thread physics (unique), D3-based, TypeScript-first, MapView via Leaflet
+* All seven permissively licensed (MIT/Apache/BSD)
 * Trying all lets us compare and pick the best fit (or offer multiple as visualization modes)
-* D3 ecosystem coherence: force-graph is D3-based internally, venn.js is D3-based — so 3 of 6 DAG candidates + the Venn lib share D3 foundations
+* D3 ecosystem coherence: force-graph, orb are D3-based internally, venn.js is D3-based — so 4 of 7 DAG candidates + the Venn lib share D3 foundations
 * React added to stack for reagraph; other candidates work with or without React
 
 ## Sources
@@ -180,3 +196,5 @@ UI:        React (needed for reagraph; other candidates work standalone or with 
 * [d3-graphviz](https://github.com/magjac/d3-graphviz) — BSD-3, 1.8k stars
 * [Sigma.js](https://github.com/jacomyal/sigma.js) — MIT, 11.6k stars
 * [graphology](https://github.com/graphology/graphology) — MIT
+* [@memgraph/orb](https://github.com/memgraph/orb) — Apache-2.0, 417 stars
+* [How to Build a Graph Visualization Engine](https://memgraph.com/blog/how-to-build-a-graph-visualization-engine-and-why-you-shouldnt) — Orb architecture blog post
