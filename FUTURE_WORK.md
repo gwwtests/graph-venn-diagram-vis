@@ -2,7 +2,7 @@
 
 Work items in priority order. Each item is worked on one at a time with user consultation before starting and sign-off before closing.
 
-## 1. Setup Repository [PENDING]
+## 1. Setup Repository [DONE]
 
 * Initialize project with Vite + TypeScript
 * Install core dependencies: Cytoscape.js, cytoscape-dagre, vis-network, force-graph, d3, d3-dag, reagraph, sigma, graphology, @memgraph/orb, react, react-dom, upsetjs/venn.js
@@ -12,7 +12,7 @@ Work items in priority order. Each item is worked on one at a time with user con
 * Create README.md with project description
 * Project structure: `src/engine/` (pure logic), `src/vis/` (visualizations), `src/cli/` (CLI)
 
-## 2. Graph Engine — Pure Computation Library [PENDING]
+## 2. Graph Engine — Pure Computation Library [DONE]
 
 Visualization-independent library for graph state management and propagation logic. Must be unit-testable and CLI-usable without any browser/DOM dependency.
 

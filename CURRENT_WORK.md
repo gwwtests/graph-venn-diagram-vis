@@ -1,3 +1,3 @@
 # CURRENT_WORK
 
-*No active work item. Next: consult user on Item 1 (Setup Repository).*
+No active task. Steps 1–2 complete. Next: Step 3 (Graph DAG Visualization).
