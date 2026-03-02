@@ -85,6 +85,7 @@
 * **reagraph** (Apache-2.0, ~1k stars) — WebGL via Three.js, built-in `HierarchicalTopDown2D`, but React-only
 * **@antv/x6** (MIT, 6.5k stars) — full diagramming/editor SDK with dagre layout, rich edge routing, undo/redo, minimap — heavier than we need, editor-oriented rather than pure visualization
 * **@logicflow/core** (Apache-2.0, 11.2k stars) — workflow/BPMN engine from DiDi, highest star count but domain-specific (workflow simulation), Chinese-primary docs
+* **neovis.js** (Apache-2.0, 1.8k stars) — thin wrapper around vis-network for Neo4j graph databases. Tightly coupled to Neo4j Bolt record format (`neo4j-driver` is a hard dependency); even standalone `dataFunction` mode requires mimicking Neo4j wire protocol, not simple `{nodes, edges}` JSON. Unmaintained since May 2023 (no releases in 2024-2025, ~600 weekly npm downloads). No value beyond using vis-network directly, which we already have as candidate 3b
 
 ## Venn Diagram Libraries
 
