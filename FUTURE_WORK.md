@@ -21,8 +21,22 @@ Work items in priority order. Each item is worked on one at a time with user con
 
 ## 3. Graph DAG Visualization [PENDING]
 
-* Implement Cytoscape.js-based DAG renderer with dagre layout
-* Layered layout: domains top, categories middle, entities bottom
+Try both approaches, compare, keep best (or both as selectable modes):
+
+### 3a. Cytoscape.js + cytoscape-dagre
+
+* Dagre-based layered layout: domains top, categories middle, entities bottom
+* CSS-like style selectors for selected/unselected states
+* Compound nodes for layer grouping
+
+### 3b. vis-network (hierarchical mode)
+
+* Built-in hierarchical layout (`direction: 'UD'`)
+* Reactive `vis.DataSet` for automatic re-renders
+* Reference: Tripleter codebase (`/mnt/ro/github/tripleter/tripleter.github.io/static/vis/v5/`)
+
+### Shared requirements (both implementations)
+
 * Node styling: selected vs unselected states (color, size, opacity, border)
 * Edge styling: active vs inactive (opacity, thickness, color)
 * Click interaction: flip node state, trigger propagation
@@ -30,7 +44,6 @@ Work items in priority order. Each item is worked on one at a time with user con
 * Path count computation via adjacency matrix multiplication
 * Visual scaling: node size and saturation based on log-normalized path counts
 * Display path count numbers on nodes
-* Explore alternative DAG renderers if Cytoscape doesn't satisfy
 
 ## 4. Venn Diagram Visualization [PENDING]
 
