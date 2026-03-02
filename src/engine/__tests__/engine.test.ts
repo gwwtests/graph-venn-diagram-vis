@@ -108,6 +108,62 @@ describe('processGraph', () => {
     ]);
   });
 
+  it('deselects entity by removing its ancestor domains', () => {
+    // x3 is connected to c1 (→d1) and c2 (→d1,d2)
+    // So x3's ancestor domains = {d1, d2}
+    // Deselecting x3 removes d1 and d2
+    const result = processGraph(masterGraph, createEmptyState(), [
+      { nodeId: 'd1', action: 'select' },
+      { nodeId: 'd2', action: 'select' },
+      { nodeId: 'x3', action: 'deselect' },
+      { nodeId: 'd1', action: 'get_state' },
+      { nodeId: 'd2', action: 'get_state' },
+      { nodeId: 'x1', action: 'get_state' },
+      { nodeId: 'x3', action: 'get_state' },
+    ]);
+    expect(result.outputs).toEqual([
+      { nodeId: 'd1', selected: false, pathCount: 0 },
+      { nodeId: 'd2', selected: false, pathCount: 0 },
+      { nodeId: 'x1', selected: false, pathCount: 0 },
+      { nodeId: 'x3', selected: false, pathCount: 0 },
+    ]);
+    expect(result.state.selectedDomains.size).toBe(0);
+  });
+
+  it('deselects category by removing its parent domains', () => {
+    // c2 is connected to d1 and d2
+    // Deselecting c2 removes d1 and d2
+    const result = processGraph(masterGraph, createEmptyState(), [
+      { nodeId: 'd1', action: 'select' },
+      { nodeId: 'd2', action: 'select' },
+      { nodeId: 'd3', action: 'select' },
+      { nodeId: 'c2', action: 'deselect' },
+      { nodeId: 'd1', action: 'get_state' },
+      { nodeId: 'd2', action: 'get_state' },
+      { nodeId: 'd3', action: 'get_state' },
+      { nodeId: 'x5', action: 'get_state' },
+    ]);
+    // d1 and d2 removed (parents of c2), d3 remains
+    expect(result.outputs).toEqual([
+      { nodeId: 'd1', selected: false, pathCount: 0 },
+      { nodeId: 'd2', selected: false, pathCount: 0 },
+      { nodeId: 'd3', selected: true, pathCount: 1 },
+      { nodeId: 'x5', selected: true, pathCount: 1 },
+    ]);
+    expect(result.state.selectedDomains).toEqual(new Set(['d3']));
+  });
+
+  it('get_state returns unselected for nodes with no active paths', () => {
+    const result = processGraph(masterGraph, createEmptyState(), [
+      { nodeId: 'd1', action: 'select' },
+      { nodeId: 'x5', action: 'get_state' },
+    ]);
+    // x5 → c4 → d3, but d3 is not selected
+    expect(result.outputs).toEqual([
+      { nodeId: 'x5', selected: false, pathCount: 0 },
+    ]);
+  });
+
   it('deselects a domain and recomputes paths', () => {
     const result = processGraph(masterGraph, createEmptyState(), [
       { nodeId: 'd1', action: 'select' },
