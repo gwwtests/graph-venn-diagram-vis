@@ -26,9 +26,27 @@
   "homepage": "https://github.com/gwwtests/graph-venn-diagram-vis#readme",
   "devDependencies": {
     "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@memgraph/orb": "^0.4.3",
+    "@upsetjs/venn.js": "^2.0.0",
+    "cytoscape": "^3.33.1",
+    "cytoscape-dagre": "^2.5.0",
+    "d3": "^7.9.0",
+    "d3-dag": "^1.1.0",
+    "force-graph": "^1.51.1",
+    "graphology": "^0.26.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "reagraph": "^4.30.8",
+    "sigma": "^3.0.2",
+    "vis-network": "^10.0.2"
   }
 }
