@@ -171,7 +171,7 @@ All implementations consume the engine from step 2 — no computation logic in v
 * Select best of each based on: visual clarity, interactivity, performance
 * Document decisions in `docs/design/`
 
-## 6. Dual-Panel Synchronized View [PENDING]
+## 6. Dual-Panel Synchronized View [DONE]
 
 * Implement adaptive split layout (see `docs/design/02-adaptive-split-layout.md`)
 * Wire both panels to shared engine state
