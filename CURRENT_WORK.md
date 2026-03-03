@@ -1,3 +1,3 @@
 # CURRENT_WORK
 
-No active task. Steps 1–3 complete. Next: Step 4 (Venn Diagram Visualization) or Step 5 (Evaluate and Select Best).
+Active: Step 6 — Dual-Panel Synchronized View (D3+d3-dag DAG panel + upsetjs/venn.js Venn panel).

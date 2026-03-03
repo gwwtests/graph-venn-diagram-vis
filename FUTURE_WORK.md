@@ -153,7 +153,7 @@ All implementations consume the engine from step 2 — no computation logic in v
 * Visual scaling: node size and saturation based on engine's log-normalized path counts
 * Display path count numbers on nodes
 
-## 4. Venn Diagram Visualization [PENDING]
+## 4. Venn Diagram Visualization [DONE]
 
 * Implement upsetjs/venn.js-based Venn renderer
 * Map DAG data to set definitions (categories or domains as sets, entities as members)
@@ -164,7 +164,7 @@ All implementations consume the engine from step 2 — no computation logic in v
 * Evaluate if UpSet plot mode is needed for many-set cases
 * Explore alternative Venn renderers
 
-## 5. Evaluate and Select Best Implementations [PENDING]
+## 5. Evaluate and Select Best Implementations [DONE]
 
 * Compare DAG visualization approaches (if multiple were tried)
 * Compare Venn visualization approaches (if multiple were tried)
