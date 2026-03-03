@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dual Panel — DAG + Venn (Synchronized)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a2e; font-family: sans-serif; overflow: hidden; }
+
+    .dual-panel {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Wide viewport: side by side */
+    @media (min-aspect-ratio: 1/1) {
+      .dual-panel { flex-direction: row; }
+      .panel { width: 50%; height: 100%; }
+      .divider { width: 2px; height: 100%; cursor: col-resize; }
+    }
+
+    /* Tall viewport: stacked */
+    @media (max-aspect-ratio: 1/1) {
+      .dual-panel { flex-direction: column; }
+      .panel { width: 100%; height: 50%; }
+      .divider { width: 100%; height: 2px; cursor: row-resize; }
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: #16162a;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+      height: 32px;
+    }
+
+    .panel-header .title {
+      color: #aaa;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .panel-header .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .panel-header button {
+      background: #2a2a4a;
+      border: 1px solid #444;
+      color: #ccc;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .panel-header button:hover { background: #3a3a5a; color: #fff; }
+
+    .panel-content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .divider {
+      background: #333;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .divider:hover { background: #4a9eff; }
+
+    /* Entity list overlay — shared between panels */
+    #entity-overlay {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 26, 46, 0.95);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #ccc;
+      font-size: 12px;
+      max-width: 500px;
+      pointer-events: none;
+      z-index: 100;
+    }
+    #entity-overlay .label { color: #fff; font-weight: bold; margin-bottom: 4px; }
+    #entity-overlay .entities { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+    #entity-overlay .entity-item { white-space: nowrap; }
+    #entity-overlay .path-count { color: #4a9eff; }
+  </style>
+</head>
+<body>
+  <div class="dual-panel" id="dual-panel">
+    <div class="panel" id="dag-panel">
+      <div class="panel-header">
+        <span class="title">DAG Graph</span>
+        <div class="controls">
+          <button id="btn-reset">Reset</button>
+        </div>
+      </div>
+      <div class="panel-content" id="dag-content"></div>
+    </div>
+    <div class="divider" id="divider"></div>
+    <div class="panel" id="venn-panel">
+      <div class="panel-header">
+        <span class="title">Venn Diagram</span>
+      </div>
+      <div class="panel-content" id="venn-content"></div>
+    </div>
+  </div>
+  <div id="entity-overlay"></div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
