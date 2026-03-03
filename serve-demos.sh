@@ -1,14 +1,15 @@
 #!/bin/bash
-# Serve DAG visualization demos for side-by-side comparison
+# Serve visualization demos for side-by-side comparison
 #
 # Usage:
-#   ./serve-demos.sh              Serve all 7 visualizations
+#   ./serve-demos.sh              Serve all 8 visualizations (7 DAG + 1 Venn)
 #   ./serve-demos.sh cytoscape    Serve only cytoscape
+#   ./serve-demos.sh venn         Serve only venn diagram
 #   ./serve-demos.sh stop         Stop all demo servers
 #   ./serve-demos.sh list         Show available demos
 #
-# Each visualization runs on its own port (4201-4207).
-# Click domain nodes (Engineering, Science, Arts) to see path count propagation.
+# Each visualization runs on its own port (4201-4208).
+# Click domain nodes/circles to see path count propagation.
 
 set -e
 
@@ -23,6 +24,7 @@ declare -A PORTS=(
   [reagraph]=4205
   [sigma]=4206
   [visnetwork]=4207
+  [venn]=4208
 )
 
 declare -A LABELS=(
@@ -33,9 +35,10 @@ declare -A LABELS=(
   [reagraph]="reagraph (WebGL/React)"
   [sigma]="Sigma.js v3 + graphology"
   [visnetwork]="vis-network (hierarchical)"
+  [venn]="Venn Diagram (upsetjs/venn.js)"
 )
 
-ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork)
+ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn)
 
 cmd_list() {
   echo "Available DAG visualization demos:"
@@ -110,7 +113,7 @@ case "${1:-all}" in
     cmd_list
     ;;
   all)
-    echo "Starting all DAG visualization demos..."
+    echo "Starting all visualization demos..."
     echo ""
     for lib in "${ALL_LIBS[@]}"; do
       serve_lib "$lib"
