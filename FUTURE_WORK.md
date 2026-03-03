@@ -180,6 +180,47 @@ All implementations consume the engine from step 2 — no computation logic in v
 * Responsive resize handling
 * Polish: transitions, animations, visual consistency between panels
 
+## 7. Bidirectional Selection Propagation (Bottom-Up + Top-Down)
+
+Currently, selection only flows **top-down**: clicking a domain selects it, propagates to categories, then entities. Clicking a **middle or bottom tier** node that is already selected triggers **deselection** — it deselects parent domains, which recomputes everything downward. However, clicking a **deselected** category or entity does nothing.
+
+### Goal
+
+Introduce **bottom-up selection**: clicking a deselected category or entity should **propagate selection upward** to its parent domain(s), which then triggers the normal top-down propagation. This creates a symmetric interaction model:
+
+* **Selected node clicked** → deselect (existing behavior, propagates up then recomputes down)
+* **Deselected node clicked** → select parent domain(s) upward, then propagate down (new behavior)
+
+### Examples
+
+| Action | Current behavior | New behavior |
+|--------|-----------------|--------------|
+| Click deselected `Software` (c1) | Nothing | Select `Engineering` (d1), propagate down → Software, Data, Hardware, x1-x4, x6 all activate |
+| Click deselected `Entity3` (x3) | Nothing | x3's categories are c1,c2 → parents are d1,d2 → select both → full d1+d2 propagation |
+| Click deselected `Data` (c2) | Nothing | c2's parents are d1,d2 → select both → full d1+d2 propagation |
+| Click deselected `Entity5` (x5) | Nothing | x5→c4→d3 → select d3 → d3 propagation only |
+
+### Implementation plan
+
+1. **Unit tests first** (engine layer, `src/engine/__tests__/`):
+   * Simplest case: click deselected category with single parent domain → verify domain selected + propagation
+   * Click deselected entity with single category, single domain → verify chain
+   * Click deselected category with multiple parent domains → verify all parents selected
+   * Click deselected entity with multiple categories spanning multiple domains → verify all ancestor domains selected
+   * Sequential: select via bottom-up, then deselect via top-down, verify clean state
+   * Edge case: click deselected entity whose some-but-not-all parent domains are already selected
+
+2. **Engine changes** (`src/engine/engine.ts`):
+   * Modify `processGraph` / event handling for `select` action on non-domain nodes
+   * When selecting a category: find parent domains via `domainToCategory` edges, select them
+   * When selecting an entity: find parent categories via `categoryToEntity`, then their parent domains, select all
+   * After selecting domains, run normal top-down propagation
+
+3. **Visualization integration**:
+   * `handleNodeClick` in `shared.ts` already toggles select/deselect — engine change should be sufficient
+   * Verify all visualization panels (DAG, Venn, dual) respond correctly
+   * Categories and entities become truly interactive (not just display-only)
+
 ---
 
 **Process**: For each item, consult user before starting. Track active work in `CURRENT_WORK.md`. On completion, mark as DONE here and clean `CURRENT_WORK.md` in the same commit.
