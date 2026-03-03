@@ -170,6 +170,47 @@ function intersectionCentroid(circles: CircleGeo[]): { x: number; y: number } {
 }
 
 /**
+ * For a single-domain category, compute a position biased AWAY from
+ * all other domain centers (toward the "exclusive" region of this domain).
+ * Uses a repulsion model: push away from each other domain proportionally.
+ */
+function exclusiveRegionCenter(
+  domainCircle: CircleGeo,
+  allDomainCircles: Map<string, CircleGeo>,
+  domainLabel: string,
+): { x: number; y: number } {
+  // Compute repulsion vector from other domains
+  let repX = 0;
+  let repY = 0;
+  let count = 0;
+
+  for (const [label, geo] of allDomainCircles) {
+    if (label === domainLabel) continue;
+    const dx = domainCircle.x - geo.x;
+    const dy = domainCircle.y - geo.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    // Stronger repulsion from closer/larger overlapping domains
+    const overlap = (domainCircle.radius + geo.radius - dist) / domainCircle.radius;
+    if (overlap > 0) {
+      const strength = overlap * 1.5;
+      repX += (dx / dist) * strength;
+      repY += (dy / dist) * strength;
+      count++;
+    }
+  }
+
+  if (count === 0) return { x: domainCircle.x, y: domainCircle.y };
+
+  const repDist = Math.sqrt(repX * repX + repY * repY) || 1;
+  // Move 45% of radius in the repulsion direction
+  const offset = domainCircle.radius * 0.45;
+  return {
+    x: domainCircle.x + (repX / repDist) * offset,
+    y: domainCircle.y + (repY / repDist) * offset,
+  };
+}
+
+/**
  * Position categories within their domain circle(s).
  * Returns a map: categoryId → { x, y, radius }
  */
@@ -194,31 +235,45 @@ function layoutCategories(domainCircles: Map<string, CircleGeo>): Map<string, Ci
 
     if (parentCircles.length === 0) continue;
 
-    const center = intersectionCentroid(parentCircles);
+    // For single-domain groups: bias toward the exclusive region
+    // For multi-domain groups: use intersection centroid
+    let center: { x: number; y: number };
+    if (domIds.length === 1) {
+      const domLabel = domainIdToLabel.get(domIds[0])!;
+      center = exclusiveRegionCenter(parentCircles[0], domainCircles, domLabel);
+    } else {
+      // Multi-domain: midpoint between domain centers, biased toward intersection
+      const midX = parentCircles.reduce((s, c) => s + c.x, 0) / parentCircles.length;
+      const midY = parentCircles.reduce((s, c) => s + c.y, 0) / parentCircles.length;
+      center = { x: midX, y: midY };
+    }
+
     const minRadius = Math.min(...parentCircles.map(c => c.radius));
 
-    // Category circle radius proportional to entity count, scaled to fit
+    // Category circle radius proportional to entity count
     const entityCounts = catIds.map(cid => (categoryEntities.get(cid) || []).length);
     const maxEntities = Math.max(...entityCounts, 1);
 
     // Use d3.packSiblings for non-overlapping layout
+    const baseR = minRadius * 0.15;
     const packData = catIds.map((cid, i) => ({
-      r: Math.max(12, minRadius * 0.18 * Math.sqrt((entityCounts[i] + 1) / (maxEntities + 1))),
+      r: Math.max(18, baseR + baseR * 0.3 * (entityCounts[i] / maxEntities)),
       cid,
     }));
 
     d3.packSiblings(packData as any);
 
-    // Scale to fit within 60% of parent region
+    // Scale to fit within region
+    const fitFraction = domIds.length === 1 ? 0.45 : 0.6;
     const maxExtent = Math.max(...packData.map((p: any) => Math.sqrt(p.x * p.x + p.y * p.y) + p.r), 1);
-    const fitScale = (minRadius * 0.55) / maxExtent;
-    const scale = Math.min(fitScale, 1.5); // don't over-scale tiny groups
+    const fitScale = (minRadius * fitFraction) / maxExtent;
+    const scale = Math.min(fitScale, 1.8);
 
     for (const p of packData as any[]) {
       result.set(p.cid, {
         x: center.x + p.x * scale,
         y: center.y + p.y * scale,
-        radius: p.r * Math.min(scale, 1),
+        radius: p.r * Math.min(scale, 1.2),
       });
     }
   }
