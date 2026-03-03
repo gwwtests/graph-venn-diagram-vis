@@ -83,7 +83,7 @@ Visualization-independent library for graph state management and propagation log
 | Edge cases | Empty graph, all selected, all deselected, select already-selected, deselect already-deselected |
 | Path count math | Verify matrix multiplication matches hand-computed values from design doc |
 
-## 3. Graph DAG Visualization [PENDING]
+## 3. Graph DAG Visualization [DONE]
 
 Try all seven approaches, compare, keep best (or multiple as selectable modes).
 All implementations consume the engine from step 2 — no computation logic in visualization code.
