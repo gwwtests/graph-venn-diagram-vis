@@ -152,10 +152,47 @@ export function handleNodeClick(
   const result = processGraph(graph, state, [{ nodeId, action: 'get_state' }]);
   const isSelected = result.outputs[0]?.selected ?? false;
 
-  // Toggle: if selected, deselect; if not, select
-  const action = isSelected ? 'deselect' : 'select';
-  const newResult = processGraph(graph, state, [{ nodeId, action }]);
-  return newResult.state;
+  if (isSelected) {
+    // Selected → deselect (works for all tiers via engine)
+    const newResult = processGraph(graph, state, [{ nodeId, action: 'deselect' }]);
+    return newResult.state;
+  }
+
+  // Deselected → select: resolve to ancestor domain(s)
+  const isDomain = graph.domains.some(d => d.id === nodeId);
+  if (isDomain) {
+    const newResult = processGraph(graph, state, [{ nodeId, action: 'select' }]);
+    return newResult.state;
+  }
+
+  // Category or entity: find ancestor domains and select them all
+  const domainIds = getAncestorDomains(graph, nodeId);
+  let newState = state;
+  for (const domId of domainIds) {
+    newState = processGraph(graph, newState, [{ nodeId: domId, action: 'select' }]).state;
+  }
+  return newState;
+}
+
+/** Find all ancestor domain IDs for a category or entity */
+function getAncestorDomains(graph: DagGraph, nodeId: string): string[] {
+  // If it's a category, find parent domains
+  if (graph.categories.some(c => c.id === nodeId)) {
+    return graph.domainToCategory
+      .filter(e => e.to === nodeId)
+      .map(e => e.from);
+  }
+  // If it's an entity, find parent categories → parent domains
+  const parentCats = graph.categoryToEntity
+    .filter(e => e.to === nodeId)
+    .map(e => e.from);
+  const doms = new Set<string>();
+  for (const catId of parentCats) {
+    for (const edge of graph.domainToCategory) {
+      if (edge.to === catId) doms.add(edge.from);
+    }
+  }
+  return [...doms];
 }
 
 export { createEmptyState, processGraph };

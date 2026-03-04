@@ -8,8 +8,8 @@ Verify all interactions specified in `docs/design/09-interaction-requirements.md
 
 * [x] Click domain → selects, propagates down
 * [x] Click selected domain → deselects, recomputes
-* [ ] Click deselected category → selects parent domain(s) (Step 7)
-* [ ] Click deselected entity → selects ancestor domain(s) (Step 7)
+* [x] Click deselected category → selects parent domain(s)
+* [x] Click deselected entity → selects ancestor domain(s)
 
 ### Venn Panel (Enhanced)
 

@@ -9,9 +9,9 @@ Canonical spec for all user interactions across visualization panels. When addin
 | Domain node | Deselected | Select domain, propagate down |
 | Domain node | Selected | Deselect domain, recompute |
 | Category node | Selected | Deselect parent domain(s), recompute |
-| Category node | Deselected | *(Step 7: select parent domain(s), propagate down)* |
+| Category node | Deselected | Select parent domain(s), propagate down |
 | Entity node | Selected | Deselect grandparent domain(s), recompute |
-| Entity node | Deselected | *(Step 7: select ancestor domain(s), propagate down)* |
+| Entity node | Deselected | Select ancestor domain(s), propagate down |
 
 ## Hover: Cross-Panel Highlight Ring
 
