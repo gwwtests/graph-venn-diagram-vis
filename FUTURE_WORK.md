@@ -221,6 +221,29 @@ Introduce **bottom-up selection**: clicking a deselected category or entity shou
    * Verify all visualization panels (DAG, Venn, dual) respond correctly
    * Categories and entities become truly interactive (not just display-only)
 
+## 8. Hover Highlight with Synchronized Cross-Panel Ring
+
+Hovering over any node should display a prominent highlight ring around it, synchronized across all panels (DAG and Venn). This makes it easy to locate the same node in both views simultaneously.
+
+### Behavior
+
+* **Hover over node** (any tier) → show a bright surrounding ring/halo on that node
+* **Cross-panel sync**: hovering on DAG node highlights the same node in Venn panel, and vice versa
+* **Ring style**: semi-transparent glow or stroke ring, color matching the node's tier color
+* **Un-hover** → ring removed on both panels
+
+### Implementation notes
+
+* Shared hover state: `hoveredNodeId: string | null` alongside existing `GraphState`
+* DAG panel: add/remove a highlight `<circle>` with larger radius behind the hovered node
+* Venn panel: add/remove highlight ring around the corresponding category circle or entity dot
+* For domain nodes in Venn: highlight the domain circle border (thicker stroke or glow filter)
+* Debounce or throttle hover events for smooth rendering
+
+### Requirements reference
+
+See `docs/design/09-interaction-requirements.md` for the full interaction spec.
+
 ---
 
 **Process**: For each item, consult user before starting. Track active work in `CURRENT_WORK.md`. On completion, mark as DONE here and clean `CURRENT_WORK.md` in the same commit.
