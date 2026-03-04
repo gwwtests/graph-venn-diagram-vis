@@ -381,6 +381,52 @@ describe('Venn positioning: 4-domain master graph', () => {
     expect(ratio).toBeGreaterThan(0.5);
   });
 
+  it('Entity6 (Hardware+Design) should be between both parent categories', () => {
+    // Entity6 = x6, parents: Hardware (c3) and Design (c4)
+    // Hardware: Engineering + Production → regionCenter(['Engineering','Production'])
+    // Design: Arts + Production → regionCenter(['Arts','Production'])
+    const hwDomIds = topo.categoryDomains.get('c3') || [];
+    const dsDomIds = topo.categoryDomains.get('c4') || [];
+    const hwLabels = hwDomIds.map(did => topo.domainIdToLabel.get(did)!);
+    const dsLabels = dsDomIds.map(did => topo.domainIdToLabel.get(did)!);
+
+    console.log('Hardware domain labels:', hwLabels);
+    console.log('Design domain labels:', dsLabels);
+
+    const hwPos = regionCenter(hwLabels, topo.allDomainLabels, circles);
+    const dsPos = regionCenter(dsLabels, topo.allDomainLabels, circles);
+
+    console.log('Hardware pos:', hwPos);
+    console.log('Design pos:', dsPos);
+
+    expect(hwPos).not.toBeNull();
+    expect(dsPos).not.toBeNull();
+
+    if (!hwPos || !dsPos) return;
+
+    const gap = dist(hwPos, dsPos);
+    console.log(`Hardware-Design gap: ${gap.toFixed(1)}`);
+
+    // Category-centroid approach for Entity6
+    const catCentroid = {
+      x: (hwPos.x + dsPos.x) / 2,
+      y: (hwPos.y + dsPos.y) / 2,
+    };
+    const distToHw = dist(catCentroid, hwPos);
+    const distToDs = dist(catCentroid, dsPos);
+
+    console.log(`Entity6 centroid: (${catCentroid.x.toFixed(1)}, ${catCentroid.y.toFixed(1)})`);
+    console.log(`Dist to Hardware: ${distToHw.toFixed(1)}, Dist to Design: ${distToDs.toFixed(1)}`);
+
+    expect(distToHw).toBeCloseTo(distToDs, 0);
+    // Should actually be between them, not at one of them
+    if (gap > 5) {
+      const ratio = distToHw / (distToDs + 0.001);
+      expect(ratio).toBeLessThan(2);
+      expect(ratio).toBeGreaterThan(0.5);
+    }
+  });
+
   it('Entity4: category-centroid is always balanced', () => {
     const researchLabels = (topo.categoryDomains.get('c5') || []).map(did => topo.domainIdToLabel.get(did)!);
     const dataLabels = (topo.categoryDomains.get('c2') || []).map(did => topo.domainIdToLabel.get(did)!);
