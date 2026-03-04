@@ -4,3 +4,6 @@ dist-*/
 tmp/
 cache/
 *.tsbuildinfo
+
+# Source maps in demo snapshots (not needed, large)
+demos/*/assets/*.js.map
