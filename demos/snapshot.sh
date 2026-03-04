@@ -77,9 +77,43 @@ for viz in "${ALL_VIZS[@]}"; do
   dest="$SNAP_DIR/$viz"
   cp -r "$dist" "$dest"
 
-  # Fix absolute asset paths → relative for file:// compatibility
-  # /assets/ → ./assets/
-  find "$dest" -name '*.html' -exec sed -i 's|="/assets/|="./assets/|g; s|='"'"'/assets/|='"'"'./assets/|g' {} +
+  # Fix for file:// compatibility:
+  # 1. Absolute asset paths → relative: /assets/ → ./assets/
+  find "$dest" -name '*.html' -exec sed -i \
+    -e 's|="/assets/|="./assets/|g' \
+    -e "s|='/assets/|='./assets/|g" \
+    {} +
+
+  # 2. If JS bundles use import.meta (e.g. orb's Web Workers), they MUST
+  #    remain as type="module" — these only work via HTTP, not file://.
+  #    Otherwise, remove type="module" and crossorigin (ES modules enforce
+  #    CORS which blocks file://). Vite bundles are IIFEs so this is safe.
+  #    Add defer to replace the implicit deferral of type="module".
+  has_import_meta=false
+  if grep -rql 'import\.meta' "$dest/assets/" 2>/dev/null; then
+    has_import_meta=true
+  fi
+
+  if [ "$has_import_meta" = false ]; then
+    find "$dest" -name '*.html' -exec sed -i \
+      -e 's| type="module"||g' \
+      -e 's| crossorigin||g' \
+      -e 's|<script src=|<script defer src=|g' \
+      {} +
+  else
+    # Keep type="module" but remove crossorigin for HTTP-served modules.
+    # Also fix absolute asset paths inside JS bundles (e.g. worker URLs).
+    find "$dest" -name '*.html' -exec sed -i \
+      -e 's| crossorigin||g' \
+      {} +
+    # Fix worker URLs in JS: new URL("/assets/file", import.meta.url)
+    # Since the JS file is already inside assets/, the path should be
+    # relative to the same directory: "./file" not "/assets/file"
+    find "$dest/assets" -name '*.js' -exec sed -i \
+      -e 's|"/assets/|"./|g' \
+      {} +
+    echo "    (requires HTTP server — uses import.meta)"
+  fi
 
   # Remove source maps (not needed for demos)
   find "$dest" -name '*.js.map' -delete 2>/dev/null || true
