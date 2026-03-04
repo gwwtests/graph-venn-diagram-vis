@@ -103,6 +103,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   Science: '#00ff88',
   Arts: '#ff6b6b',
   Production: '#ff9f43',
+  Computing: '#a855f7',
 };
 
 /** Selected color (brighter) */
@@ -111,6 +112,7 @@ const SELECTED_COLORS: Record<string, string> = {
   Science: '#33ff99',
   Arts: '#ff8888',
   Production: '#ffb366',
+  Computing: '#c084fc',
 };
 
 const domainSets = domainEntitySets(graph);

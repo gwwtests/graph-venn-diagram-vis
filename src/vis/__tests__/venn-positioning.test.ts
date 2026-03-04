@@ -282,13 +282,13 @@ describe('Venn positioning: entity cross-category placement', () => {
 
 import { masterGraph } from '../shared';
 
-describe('Venn positioning: 4-domain master graph', () => {
+describe('Venn positioning: 5-domain master graph', () => {
   const vennData = buildVennData(masterGraph);
   const circles = computeCircles(vennData);
   const topo = buildTopology(masterGraph);
 
-  it('should produce 4 domain circles', () => {
-    expect(circles.size).toBe(4);
+  it('should produce 5 domain circles', () => {
+    expect(circles.size).toBe(5);
     for (const [label, geo] of circles) {
       console.log(`${label}: center=(${geo.x.toFixed(1)}, ${geo.y.toFixed(1)}), r=${geo.radius.toFixed(1)}`);
     }

@@ -12,6 +12,7 @@ export const masterGraph: DagGraph = {
     { id: 'd2', label: 'Science' },
     { id: 'd3', label: 'Arts' },
     { id: 'd4', label: 'Production' },
+    { id: 'd5', label: 'Computing' },
   ],
   categories: [
     { id: 'c1', label: 'Software' },
@@ -37,6 +38,8 @@ export const masterGraph: DagGraph = {
     { from: 'd3', to: 'c4' },
     { from: 'd4', to: 'c3' },
     { from: 'd4', to: 'c4' },
+    { from: 'd5', to: 'c1' },
+    { from: 'd5', to: 'c2' },
   ],
   categoryToEntity: [
     { from: 'c1', to: 'x1' },
