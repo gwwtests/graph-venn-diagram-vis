@@ -343,37 +343,48 @@ function render() {
     }
   }
 
-  // ─── Position entities using computeTextCentre ───
+  // ─── Position entities at centroid of parent category positions ───
+  // This ensures multi-category entities appear between their parents,
+  // not biased to one domain region (see ramblings/2026-03-04--entity-cross-category-venn-positioning.md)
   const entityPositions = new Map<string, { x: number; y: number }>();
 
-  // Group entities by their Venn region (set of domain labels)
-  const entityRegionGroups = new Map<string, string[]>();
   for (const e of graph.entities) {
-    const domLabels = entityDomainLabels(e.id);
-    const key = domLabels.slice().sort().join(',');
-    const arr = entityRegionGroups.get(key) || [];
-    arr.push(e.id);
-    entityRegionGroups.set(key, arr);
+    const cats = entityCategories.get(e.id) || [];
+    const parentPositions = cats
+      .map(cid => catPositions.get(cid))
+      .filter((p): p is { x: number; y: number } => p !== undefined);
+
+    if (parentPositions.length === 0) {
+      // Fallback: use domain-region center
+      const domLabels = entityDomainLabels(e.id);
+      const center = regionCenter(domLabels, domainCircles);
+      if (center) entityPositions.set(e.id, { x: center.x, y: center.y + catBaseRadius + 8 });
+      continue;
+    }
+
+    // Centroid of parent category positions
+    const cx = parentPositions.reduce((s, p) => s + p.x, 0) / parentPositions.length;
+    const cy = parentPositions.reduce((s, p) => s + p.y, 0) / parentPositions.length;
+    entityPositions.set(e.id, { x: cx, y: cy + catBaseRadius + 8 });
   }
 
-  for (const [regionKey, entityIds] of entityRegionGroups) {
-    const domLabels = regionKey.split(',');
-    const center = regionCenter(domLabels, domainCircles);
-    if (!center) continue;
-
-    if (entityIds.length === 1) {
-      // Place slightly below the region center (categories tend to be above)
-      entityPositions.set(entityIds[0], { x: center.x, y: center.y + catBaseRadius + 8 });
-    } else {
-      // Pack entities around the region center, offset below category circles
-      const packData = entityIds.map(eid => ({ r: 5, eid }));
-      d3.packSiblings(packData as any);
-      for (const p of packData as any[]) {
-        entityPositions.set(p.eid, {
-          x: center.x + p.x,
-          y: center.y + catBaseRadius + 8 + p.y,
-        });
-      }
+  // Spread overlapping entities using packSiblings
+  const entityByPos = new Map<string, string[]>();
+  for (const e of graph.entities) {
+    const pos = entityPositions.get(e.id);
+    if (!pos) continue;
+    const key = `${pos.x.toFixed(1)},${pos.y.toFixed(1)}`;
+    const arr = entityByPos.get(key) || [];
+    arr.push(e.id);
+    entityByPos.set(key, arr);
+  }
+  for (const [, eids] of entityByPos) {
+    if (eids.length <= 1) continue;
+    const base = entityPositions.get(eids[0])!;
+    const packData = eids.map(eid => ({ r: 5, eid }));
+    d3.packSiblings(packData as any);
+    for (const p of packData as any[]) {
+      entityPositions.set(p.eid, { x: base.x + p.x, y: base.y + p.y });
     }
   }
 

@@ -516,34 +516,44 @@ function renderVenn() {
     }
   }
 
-  // ─── Position entities using computeTextCentre ───
+  // ─── Position entities at centroid of parent category positions ───
   const entityPositions = new Map<string, { x: number; y: number }>();
 
-  const entityRegionGroups = new Map<string, string[]>();
   for (const e of graph.entities) {
-    const domLabels = entityDomainLabels(e.id);
-    const key = domLabels.slice().sort().join(',');
-    const arr = entityRegionGroups.get(key) || [];
-    arr.push(e.id);
-    entityRegionGroups.set(key, arr);
+    const cats = entityCategories.get(e.id) || [];
+    const parentPositions = cats
+      .map(cid => catPositions.get(cid))
+      .filter((p): p is { x: number; y: number } => p !== undefined);
+
+    if (parentPositions.length === 0) {
+      const domLabels = entityDomainLabels(e.id);
+      const center = regionCenter(domLabels, domainCircles);
+      if (center) entityPositions.set(e.id, { x: center.x, y: center.y + catBaseRadius + 6 });
+      continue;
+    }
+
+    const cx = parentPositions.reduce((s, p) => s + p.x, 0) / parentPositions.length;
+    const cy = parentPositions.reduce((s, p) => s + p.y, 0) / parentPositions.length;
+    entityPositions.set(e.id, { x: cx, y: cy + catBaseRadius + 6 });
   }
 
-  for (const [regionKey, entityIds] of entityRegionGroups) {
-    const domLabels = regionKey.split(',');
-    const center = regionCenter(domLabels, domainCircles);
-    if (!center) continue;
-
-    if (entityIds.length === 1) {
-      entityPositions.set(entityIds[0], { x: center.x, y: center.y + catBaseRadius + 6 });
-    } else {
-      const packData = entityIds.map(eid => ({ r: 4, eid }));
-      d3.packSiblings(packData as any);
-      for (const p of packData as any[]) {
-        entityPositions.set(p.eid, {
-          x: center.x + p.x,
-          y: center.y + catBaseRadius + 6 + p.y,
-        });
-      }
+  // Spread overlapping entities
+  const entityByPos = new Map<string, string[]>();
+  for (const e of graph.entities) {
+    const pos = entityPositions.get(e.id);
+    if (!pos) continue;
+    const key = `${pos.x.toFixed(1)},${pos.y.toFixed(1)}`;
+    const arr = entityByPos.get(key) || [];
+    arr.push(e.id);
+    entityByPos.set(key, arr);
+  }
+  for (const [, eids] of entityByPos) {
+    if (eids.length <= 1) continue;
+    const base = entityPositions.get(eids[0])!;
+    const packData = eids.map(eid => ({ r: 4, eid }));
+    d3.packSiblings(packData as any);
+    for (const p of packData as any[]) {
+      entityPositions.set(p.eid, { x: base.x + p.x, y: base.y + p.y });
     }
   }
 
