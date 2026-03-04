@@ -244,6 +244,7 @@ const domainLabelToId = new Map(graph.domains.map(d => [d.label, d.id]));
 const domainIdToLabel = new Map(graph.domains.map(d => [d.id, d.label]));
 const categoryIdToLabel = new Map(graph.categories.map(c => [c.id, c.label]));
 const entityIdToLabel = new Map(graph.entities.map(e => [e.id, e.label]));
+const allDomainLabels = graph.domains.map(d => d.label);
 
 /** Which domains each category belongs to */
 const categoryDomains = new Map<string, string[]>();
@@ -302,13 +303,34 @@ function buildVennData(): venn.ISetOverlap[] {
     }
   }
 
+  // Triple intersections
   if (domainIds.length >= 3) {
+    for (let i = 0; i < domainIds.length; i++) {
+      for (let j = i + 1; j < domainIds.length; j++) {
+        for (let k = j + 1; k < domainIds.length; k++) {
+          const a = domainSets.get(domainIds[i])!;
+          const b = domainSets.get(domainIds[j])!;
+          const c = domainSets.get(domainIds[k])!;
+          const triple = new Set([...a].filter(x => b.has(x) && c.has(x)));
+          if (triple.size > 0) {
+            data.push({
+              sets: [domainIdToLabel.get(domainIds[i])!, domainIdToLabel.get(domainIds[j])!, domainIdToLabel.get(domainIds[k])!],
+              size: triple.size,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Quad intersection
+  if (domainIds.length >= 4) {
     const all = domainIds.map(d => domainSets.get(d)!);
-    const triple = new Set([...all[0]].filter(x => all[1].has(x) && all[2].has(x)));
-    if (triple.size > 0) {
+    const quad = new Set([...all[0]].filter(x => all.every(s => s.has(x))));
+    if (quad.size > 0) {
       data.push({
         sets: domainIds.map(d => domainIdToLabel.get(d)!),
-        size: triple.size,
+        size: quad.size,
       });
     }
   }
@@ -318,141 +340,44 @@ function buildVennData(): venn.ISetOverlap[] {
 
 interface CircleGeo { x: number; y: number; radius: number; }
 
-function intersectionCentroid(circles: CircleGeo[]): { x: number; y: number } {
-  if (circles.length === 1) return { x: circles[0].x, y: circles[0].y };
-  let totalWeight = 0, wx = 0, wy = 0;
-  for (const c of circles) {
-    const w = 1 / (c.radius * c.radius);
-    wx += c.x * w; wy += c.y * w; totalWeight += w;
-  }
-  return { x: wx / totalWeight, y: wy / totalWeight };
+/**
+ * Find the visual center of a Venn region using computeTextCentre
+ * (pole of inaccessibility via Nelder-Mead optimization).
+ */
+function regionCenter(
+  interiorLabels: string[],
+  allCircles: Map<string, CircleGeo>,
+): { x: number; y: number } | null {
+  const interior = interiorLabels
+    .map(l => allCircles.get(l))
+    .filter((c): c is CircleGeo => c !== undefined);
+  const exterior = allDomainLabels
+    .filter(l => !interiorLabels.includes(l))
+    .map(l => allCircles.get(l))
+    .filter((c): c is CircleGeo => c !== undefined);
+
+  if (interior.length === 0) return null;
+
+  const center = venn.computeTextCentre(interior, exterior);
+
+  // computeTextCentre returns {x:0, y:-1000} for impossible regions
+  if (center.y < -500) return null;
+
+  return center;
 }
 
-function exclusiveRegionCenter(
-  domainCircle: CircleGeo,
-  allDomainCircles: Map<string, CircleGeo>,
-  domainLabel: string,
-): { x: number; y: number } {
-  let repX = 0, repY = 0, count = 0;
-  for (const [label, geo] of allDomainCircles) {
-    if (label === domainLabel) continue;
-    const dx = domainCircle.x - geo.x;
-    const dy = domainCircle.y - geo.y;
-    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const overlap = (domainCircle.radius + geo.radius - dist) / domainCircle.radius;
-    if (overlap > 0) {
-      const strength = overlap * 1.5;
-      repX += (dx / dist) * strength;
-      repY += (dy / dist) * strength;
-      count++;
+/**
+ * Compute entity's Venn region: the set of domain labels reachable from it.
+ */
+function entityDomainLabels(entityId: string): string[] {
+  const cats = entityCategories.get(entityId) || [];
+  const doms = new Set<string>();
+  for (const catId of cats) {
+    for (const domId of categoryDomains.get(catId) || []) {
+      doms.add(domainIdToLabel.get(domId)!);
     }
   }
-  if (count === 0) return { x: domainCircle.x, y: domainCircle.y };
-  const repDist = Math.sqrt(repX * repX + repY * repY) || 1;
-  const offset = domainCircle.radius * 0.45;
-  return { x: domainCircle.x + (repX / repDist) * offset, y: domainCircle.y + (repY / repDist) * offset };
-}
-
-function layoutCategories(domainCircles: Map<string, CircleGeo>): Map<string, CircleGeo> {
-  const result = new Map<string, CircleGeo>();
-  const groups = new Map<string, string[]>();
-  for (const c of graph.categories) {
-    const doms = categoryDomains.get(c.id) || [];
-    const key = doms.slice().sort().join(',');
-    const arr = groups.get(key) || [];
-    arr.push(c.id);
-    groups.set(key, arr);
-  }
-
-  for (const [domKey, catIds] of groups) {
-    const domIds = domKey.split(',');
-    const parentCircles = domIds
-      .map(did => domainCircles.get(domainIdToLabel.get(did)!))
-      .filter((c): c is CircleGeo => c !== undefined);
-    if (parentCircles.length === 0) continue;
-
-    let center: { x: number; y: number };
-    if (domIds.length === 1) {
-      const domLabel = domainIdToLabel.get(domIds[0])!;
-      center = exclusiveRegionCenter(parentCircles[0], domainCircles, domLabel);
-    } else {
-      const midX = parentCircles.reduce((s, c) => s + c.x, 0) / parentCircles.length;
-      const midY = parentCircles.reduce((s, c) => s + c.y, 0) / parentCircles.length;
-      center = { x: midX, y: midY };
-    }
-
-    const minRadius = Math.min(...parentCircles.map(c => c.radius));
-    const entCounts = catIds.map(cid => (categoryEntities.get(cid) || []).length);
-    const maxEnts = Math.max(...entCounts, 1);
-    const baseR = minRadius * 0.15;
-    const packData = catIds.map((cid, i) => ({
-      r: Math.max(18, baseR + baseR * 0.3 * (entCounts[i] / maxEnts)),
-      cid,
-    }));
-
-    d3.packSiblings(packData as any);
-
-    const fitFraction = domIds.length === 1 ? 0.45 : 0.6;
-    const maxExtent = Math.max(...packData.map((p: any) => Math.sqrt(p.x * p.x + p.y * p.y) + p.r), 1);
-    const fitScale = (minRadius * fitFraction) / maxExtent;
-    const scale = Math.min(fitScale, 1.8);
-
-    for (const p of packData as any[]) {
-      result.set(p.cid, {
-        x: center.x + p.x * scale,
-        y: center.y + p.y * scale,
-        radius: p.r * Math.min(scale, 1.2),
-      });
-    }
-  }
-  return result;
-}
-
-function layoutEntities(catCircles: Map<string, CircleGeo>): Map<string, { x: number; y: number }> {
-  const result = new Map<string, { x: number; y: number }>();
-  const ENTITY_DOT_RADIUS = 5;
-  const processed = new Set<string>();
-
-  // Multi-category entities: position at centroid of parent category circles
-  for (const e of graph.entities) {
-    const cats = entityCategories.get(e.id) || [];
-    if (cats.length > 1) {
-      const parentCircles = cats.map(cid => catCircles.get(cid)).filter((c): c is CircleGeo => c !== undefined);
-      if (parentCircles.length > 0) {
-        result.set(e.id, intersectionCentroid(parentCircles));
-        processed.add(e.id);
-      }
-    }
-  }
-
-  // Single-category entities: pack inside their category circle
-  const catSingleEntities = new Map<string, string[]>();
-  for (const e of graph.entities) {
-    if (processed.has(e.id)) continue;
-    const cats = entityCategories.get(e.id) || [];
-    if (cats.length === 1) {
-      const arr = catSingleEntities.get(cats[0]) || [];
-      arr.push(e.id);
-      catSingleEntities.set(cats[0], arr);
-    }
-  }
-
-  for (const [catId, entityIds] of catSingleEntities) {
-    const catCircle = catCircles.get(catId);
-    if (!catCircle) continue;
-    if (entityIds.length === 1) {
-      result.set(entityIds[0], { x: catCircle.x, y: catCircle.y });
-    } else {
-      const packData = entityIds.map(eid => ({ r: ENTITY_DOT_RADIUS, eid }));
-      d3.packSiblings(packData as any);
-      const maxExtent = Math.max(...packData.map((p: any) => Math.sqrt(p.x * p.x + p.y * p.y) + p.r), 1);
-      const fitScale = Math.min((catCircle.radius * 0.7) / maxExtent, 1);
-      for (const p of packData as any[]) {
-        result.set(p.eid, { x: catCircle.x + p.x * fitScale, y: catCircle.y + p.y * fitScale });
-      }
-    }
-  }
-  return result;
+  return [...doms];
 }
 
 function renderVenn() {
@@ -546,22 +471,96 @@ function renderVenn() {
 
   if (domainCircles.size === 0) return;
 
-  // ─── Layout & render categories + entities ───
-  const catCircles = layoutCategories(domainCircles);
-  const entityPositions = layoutEntities(catCircles);
+  // ─── Position categories using computeTextCentre ───
+  const catPositions = new Map<string, { x: number; y: number }>();
+  const catRadii = new Map<string, number>();
 
+  const minDomainRadius = Math.min(...[...domainCircles.values()].map(c => c.radius));
+  const catBaseRadius = Math.max(12, minDomainRadius * 0.12);
+
+  for (const c of graph.categories) {
+    const parentDomIds = categoryDomains.get(c.id) || [];
+    const parentLabels = parentDomIds.map(did => domainIdToLabel.get(did)!);
+    const center = regionCenter(parentLabels, domainCircles);
+    if (center) {
+      catPositions.set(c.id, center);
+      const entityCount = (categoryEntities.get(c.id) || []).length;
+      catRadii.set(c.id, catBaseRadius + catBaseRadius * 0.15 * entityCount);
+    }
+  }
+
+  // Spread categories sharing the same region using packSiblings
+  const regionGroups = new Map<string, string[]>();
+  for (const c of graph.categories) {
+    if (!catPositions.has(c.id)) continue;
+    const parentDomIds = categoryDomains.get(c.id) || [];
+    const key = parentDomIds.slice().sort().join(',');
+    const arr = regionGroups.get(key) || [];
+    arr.push(c.id);
+    regionGroups.set(key, arr);
+  }
+
+  for (const [, catIds] of regionGroups) {
+    if (catIds.length <= 1) continue;
+    const center = catPositions.get(catIds[0])!;
+    const packData = catIds.map(cid => ({
+      r: catRadii.get(cid) || catBaseRadius,
+      cid,
+    }));
+    d3.packSiblings(packData as any);
+    for (const p of packData as any[]) {
+      catPositions.set(p.cid, {
+        x: center.x + p.x,
+        y: center.y + p.y,
+      });
+    }
+  }
+
+  // ─── Position entities using computeTextCentre ───
+  const entityPositions = new Map<string, { x: number; y: number }>();
+
+  const entityRegionGroups = new Map<string, string[]>();
+  for (const e of graph.entities) {
+    const domLabels = entityDomainLabels(e.id);
+    const key = domLabels.slice().sort().join(',');
+    const arr = entityRegionGroups.get(key) || [];
+    arr.push(e.id);
+    entityRegionGroups.set(key, arr);
+  }
+
+  for (const [regionKey, entityIds] of entityRegionGroups) {
+    const domLabels = regionKey.split(',');
+    const center = regionCenter(domLabels, domainCircles);
+    if (!center) continue;
+
+    if (entityIds.length === 1) {
+      entityPositions.set(entityIds[0], { x: center.x, y: center.y + catBaseRadius + 6 });
+    } else {
+      const packData = entityIds.map(eid => ({ r: 4, eid }));
+      d3.packSiblings(packData as any);
+      for (const p of packData as any[]) {
+        entityPositions.set(p.eid, {
+          x: center.x + p.x,
+          y: center.y + catBaseRadius + 6 + p.y,
+        });
+      }
+    }
+  }
+
+  // ─── Render overlay ───
   const svgD3 = d3.select(svgEl);
   const overlayGroup = svgD3.append('g').attr('class', 'enhanced-overlay');
 
   // Category circles
   for (const c of graph.categories) {
-    const geo = catCircles.get(c.id);
-    if (!geo) continue;
+    const pos = catPositions.get(c.id);
+    if (!pos) continue;
+    const radius = catRadii.get(c.id) || catBaseRadius;
     const isSelected = selectedCategories.has(c.id);
 
     const catGroup = overlayGroup.append('g')
       .attr('class', 'category-node')
-      .attr('transform', `translate(${geo.x}, ${geo.y})`)
+      .attr('transform', `translate(${pos.x}, ${pos.y})`)
       .style('cursor', 'pointer')
       .on('click', () => {
         const doms = categoryDomains.get(c.id) || [];
@@ -572,7 +571,7 @@ function renderVenn() {
       });
 
     catGroup.append('circle')
-      .attr('r', geo.radius)
+      .attr('r', radius)
       .attr('fill', isSelected ? CATEGORY_COLOR_SELECTED : CATEGORY_COLOR)
       .attr('fill-opacity', isSelected ? 0.4 : 0.12)
       .attr('stroke', isSelected ? CATEGORY_COLOR_SELECTED : CATEGORY_COLOR)
@@ -582,7 +581,7 @@ function renderVenn() {
 
     catGroup.append('text')
       .attr('text-anchor', 'middle')
-      .attr('dy', -geo.radius - 3)
+      .attr('dy', -radius - 3)
       .attr('font-size', '9px')
       .attr('fill', isSelected ? '#fff' : '#888')
       .attr('font-weight', isSelected ? 'bold' : 'normal')
