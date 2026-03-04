@@ -557,6 +557,24 @@ function renderVenn() {
     }
   }
 
+  // ─── Resize category circles to encompass their entities ───
+  for (const c of graph.categories) {
+    const pos = catPositions.get(c.id);
+    if (!pos) continue;
+    const ents = categoryEntities.get(c.id) || [];
+    let maxDist = 0;
+    for (const eid of ents) {
+      const epos = entityPositions.get(eid);
+      if (epos) {
+        const d = Math.sqrt((pos.x - epos.x) ** 2 + (pos.y - epos.y) ** 2);
+        if (d > maxDist) maxDist = d;
+      }
+    }
+    // Radius = distance to farthest entity + entity dot radius + margin
+    const minR = catBaseRadius;
+    catRadii.set(c.id, Math.max(minR, maxDist + 10));
+  }
+
   // ─── Render overlay ───
   const svgD3 = d3.select(svgEl);
   const overlayGroup = svgD3.append('g').attr('class', 'enhanced-overlay');
