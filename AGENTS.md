@@ -16,4 +16,4 @@ When adding new domains, assign colors in **all** files that have `DOMAIN_COLORS
 
 * `src/vis/venn/main.ts`
 * `src/vis/venn-enhanced/main.ts`
-* `src/vis/dual/main.ts`
+* `src/vis/dual-v1/main.ts`

@@ -2,7 +2,7 @@
 # Serve visualization demos for side-by-side comparison
 #
 # Usage:
-#   ./serve-demos.sh              Serve all 10 visualizations (7 DAG + 2 Venn + 1 Dual)
+#   ./serve-demos.sh              Serve all 10 visualizations (7 DAG + 2 Venn + 1 Dual-v1)
 #   ./serve-demos.sh cytoscape    Serve only cytoscape
 #   ./serve-demos.sh venn         Serve only venn diagram
 #   ./serve-demos.sh stop         Stop all demo servers
@@ -25,7 +25,7 @@ declare -A PORTS=(
   [sigma]=4206
   [visnetwork]=4207
   [venn]=4208
-  [dual]=4209
+  [dual-v1]=4209
   [venn-enhanced]=4210
 )
 
@@ -38,11 +38,11 @@ declare -A LABELS=(
   [sigma]="Sigma.js v3 + graphology"
   [visnetwork]="vis-network (hierarchical)"
   [venn]="Venn Diagram (upsetjs/venn.js)"
-  [dual]="Dual Panel (DAG + Venn synchronized)"
+  [dual-v1]="Dual Panel v1 (DAG + Venn synchronized)"
   [venn-enhanced]="Enhanced Venn (domains + categories + entities)"
 )
 
-ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn dual venn-enhanced)
+ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn dual-v1 venn-enhanced)
 
 cmd_list() {
   echo "Available visualization demos:"

@@ -1,4 +1,4 @@
-# Dual Panel — Synchronized DAG + Venn View
+# Dual Panel v1 — Synchronized DAG + Venn View
 
 ## Architecture
 
@@ -10,8 +10,8 @@
 ## Build and Run
 
 ```bash
-npx vite build --config vite.dual.config.ts
-./serve-demos.sh dual
+npx vite build --config vite.dual-v1.config.ts
+./serve-demos.sh dual-v1
 # → http://localhost:4209
 ```
 
@@ -49,7 +49,7 @@ Each panel gets 50% of the available space with a thin divider.
 ## CDP Testing
 
 ```bash
-./manage-cdp.sh start dual 9309 8309 dist-dual
+./manage-cdp.sh start dual-v1 9309 8309 dist-dual-v1
 ```
 
 APIs:

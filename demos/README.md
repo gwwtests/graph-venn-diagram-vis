@@ -55,7 +55,7 @@ demos/
 ├── README.md               — This file
 ├── bidirectional-selection/ — A snapshot
 │   ├── index.html          — Snapshot landing (links to each viz)
-│   ├── dual/
+│   ├── dual-v1/
 │   │   ├── index.html
 │   │   └── assets/
 │   ├── venn-enhanced/
@@ -77,4 +77,4 @@ demos/
 | visnetwork | vis-network (hierarchical) |
 | venn | Venn Diagram (upsetjs/venn.js) |
 | venn-enhanced | Enhanced Venn (domains + categories + entities) |
-| dual | Dual Panel (DAG + Venn synchronized) |
+| dual-v1 | Dual Panel v1 (DAG + Venn synchronized) |

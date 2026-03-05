@@ -16,7 +16,7 @@ Snapshot under test: `demos/bidirectional-selection/`
 | visnetwork | [x] | [x] | |
 | venn | [x] | [x] | |
 | venn-enhanced | [x] | [x] | |
-| dual | [x] | [x] | |
+| dual-v1 | [x] | [x] | |
 
 **9/10 work from file://.** Orb is a known limitation (Web Workers require CORS/HTTP).
 
@@ -33,7 +33,7 @@ Snapshot under test: `demos/bidirectional-selection/`
 | visnetwork | [x] | [x] | |
 | venn | [x] | [x] | |
 | venn-enhanced | [x] | [x] | |
-| dual | [x] | [x] | |
+| dual-v1 | [x] | [x] | |
 
 **10/10 work via HTTP** (`python3 -m http.server -d demos`).
 
@@ -79,7 +79,7 @@ Correct order: **Domains (top) → Categories (middle) → Entities (bottom)**
 |-----|-------------|---------------|-------------|----------|------------|
 | venn | [x] | N/A | N/A | [x] | [x] |
 | venn-enhanced | [x] | [x] | [x] | [x] | [x] |
-| dual | [x] | [x] | [x] | [x] | [x] |
+| dual-v1 | [x] | [x] | [x] | [x] | [x] |
 
 ## Landing Pages
 
