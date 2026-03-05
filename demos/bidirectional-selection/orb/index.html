@@ -5,10 +5,79 @@
   <style>
     body { margin: 0; font-family: sans-serif; background: #1a1a2e; }
     #graph { width: 100vw; height: 100vh; }
+    #file-protocol-info {
+      display: none;
+      position: fixed; inset: 0;
+      background: #1a1a2e; color: #e0e0e0;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 3rem 2rem;
+      z-index: 9999;
+      overflow-y: auto;
+    }
+    #file-protocol-info h1 { color: #00d4ff; margin-bottom: 0.5rem; font-size: 1.6rem; }
+    #file-protocol-info .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.95rem; }
+    #file-protocol-info h2 { color: #00d4ff; font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+    #file-protocol-info p { line-height: 1.6; margin-bottom: 0.8rem; max-width: 700px; }
+    #file-protocol-info code {
+      background: #16213e; border: 1px solid #0f3460; border-radius: 4px;
+      padding: 0.15em 0.4em; font-size: 0.9em; color: #00d4ff;
+    }
+    #file-protocol-info pre {
+      background: #16213e; border: 1px solid #0f3460; border-radius: 6px;
+      padding: 1rem; margin: 0.8rem 0 1.2rem; overflow-x: auto;
+      max-width: 700px;
+    }
+    #file-protocol-info pre code {
+      background: none; border: none; padding: 0; color: #e0e0e0;
+    }
+    #file-protocol-info a { color: #00d4ff; text-decoration: none; }
+    #file-protocol-info a:hover { text-decoration: underline; }
+    #file-protocol-info .note {
+      background: #16213e; border-left: 3px solid #00d4ff; border-radius: 4px;
+      padding: 0.8rem 1rem; margin: 1rem 0; max-width: 700px;
+    }
   </style>
   <script type="module" src="./assets/index-COXgBDdi.js"></script>
 </head>
 <body>
   <div id="graph"></div>
+  <div id="file-protocol-info">
+    <h1>@memgraph/orb — HTTP Server Required</h1>
+    <p class="subtitle">This visualization cannot run from <code>file://</code> URLs.</p>
+
+    <h2>Why is the page blank?</h2>
+    <p>
+      Orb uses <strong>Web Workers</strong> via <code>import.meta</code> for its rendering
+      pipeline. Browsers block Web Worker creation from <code>file://</code> due to
+      CORS / same-origin restrictions. All other demo visualizations work from
+      <code>file://</code> — only orb has this limitation.
+    </p>
+
+    <h2>How to view this demo</h2>
+    <p>Serve the demos directory with any HTTP server:</p>
+    <pre><code># Option A — Python
+python3 -m http.server 8234 -d demos
+
+# Option B — Node / npx
+npx serve demos -l 8234</code></pre>
+    <p>Then open: <a href="http://localhost:8234/bidirectional-selection/orb/">http://localhost:8234/bidirectional-selection/orb/</a></p>
+
+    <div class="note">
+      Or use the helper script from the repo root: <code>./serve-demos.sh orb</code>
+    </div>
+
+    <h2>About Orb</h2>
+    <p>
+      <a href="https://github.com/memgraph/orb" target="_blank">@memgraph/orb</a> is
+      a graph visualization library by Memgraph, using WebGL for high-performance
+      rendering of large graphs.
+    </p>
+  </div>
+  <script>
+    if (window.location.protocol === 'file:') {
+      document.getElementById('file-protocol-info').style.display = 'block';
+      document.getElementById('graph').style.display = 'none';
+    }
+  </script>
 </body>
 </html>

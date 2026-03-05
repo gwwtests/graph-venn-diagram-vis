@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # All visualization targets (must match vite.{name}.config.ts)
-ALL_VIZS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn venn-enhanced dual)
+ALL_VIZS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn venn-enhanced dual-v1)
 
 declare -A LABELS=(
   [cytoscape]="Cytoscape.js + dagre"
@@ -25,8 +25,67 @@ declare -A LABELS=(
   [visnetwork]="vis-network (hierarchical)"
   [venn]="Venn Diagram (upsetjs/venn.js)"
   [venn-enhanced]="Enhanced Venn (domains + categories + entities)"
-  [dual]="Dual Panel (DAG + Venn synchronized)"
+  [dual-v1]="Dual Panel v1 (DAG + Venn synchronized)"
 )
+
+# Inject file:// protocol info overlay into an HTML file.
+# Called for visualizations that use import.meta (Web Workers) and
+# therefore cannot work from file:// URLs.
+_inject_file_protocol_info() {
+  local html_file="$1"
+  local viz_name="$2"
+  local label="${LABELS[$viz_name]:-$viz_name}"
+
+  # Inject CSS + overlay div + detection script before </body>
+  sed -i '/<\/body>/i \
+  <style>\
+    #file-protocol-info {\
+      display: none; position: fixed; inset: 0;\
+      background: #1a1a2e; color: #e0e0e0;\
+      font-family: system-ui, -apple-system, sans-serif;\
+      padding: 3rem 2rem; z-index: 9999; overflow-y: auto;\
+    }\
+    #file-protocol-info h1 { color: #00d4ff; margin-bottom: 0.5rem; font-size: 1.6rem; }\
+    #file-protocol-info .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.95rem; }\
+    #file-protocol-info h2 { color: #00d4ff; font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }\
+    #file-protocol-info p { line-height: 1.6; margin-bottom: 0.8rem; max-width: 700px; }\
+    #file-protocol-info code {\
+      background: #16213e; border: 1px solid #0f3460; border-radius: 4px;\
+      padding: 0.15em 0.4em; font-size: 0.9em; color: #00d4ff;\
+    }\
+    #file-protocol-info pre {\
+      background: #16213e; border: 1px solid #0f3460; border-radius: 6px;\
+      padding: 1rem; margin: 0.8rem 0 1.2rem; overflow-x: auto; max-width: 700px;\
+    }\
+    #file-protocol-info pre code { background: none; border: none; padding: 0; color: #e0e0e0; }\
+    #file-protocol-info a { color: #00d4ff; text-decoration: none; }\
+    #file-protocol-info a:hover { text-decoration: underline; }\
+    #file-protocol-info .note {\
+      background: #16213e; border-left: 3px solid #00d4ff; border-radius: 4px;\
+      padding: 0.8rem 1rem; margin: 1rem 0; max-width: 700px;\
+    }\
+  </style>\
+  <div id="file-protocol-info">\
+    <h1>'"$label"' — HTTP Server Required</h1>\
+    <p class="subtitle">This visualization cannot run from <code>file:///</code> URLs.</p>\
+    <h2>Why is the page blank?</h2>\
+    <p>This visualization uses <strong>Web Workers</strong> via <code>import.meta</code>.\
+    Browsers block Web Worker creation from <code>file:///</code> due to CORS \\/ same-origin restrictions.\
+    All other demo visualizations work from <code>file:///</code> — only this one has this limitation.</p>\
+    <h2>How to view this demo</h2>\
+    <p>Serve the demos directory with any HTTP server:</p>\
+    <pre><code># Option A — Python\\npython3 -m http.server 8234 -d demos\\n\\n# Option B — Node \\/ npx\\nnpx serve demos -l 8234</code></pre>\
+    <p>Then open: <a href="http://localhost:8234/">http://localhost:8234/</a> and navigate to this visualization.</p>\
+    <div class="note">Or use the helper script from the repo root: <code>.\\\/serve-demos.sh '"$viz_name"'</code></div>\
+  </div>\
+  <script>\
+    if (window.location.protocol === "file:") {\
+      document.getElementById("file-protocol-info").style.display = "block";\
+      var graph = document.getElementById("graph");\
+      if (graph) graph.style.display = "none";\
+    }\
+  </script>' "$html_file"
+}
 
 # Determine snapshot name
 if [ $# -ge 1 ]; then
@@ -113,6 +172,10 @@ for viz in "${ALL_VIZS[@]}"; do
       -e 's|"/assets/|"./|g' \
       {} +
     echo "    (requires HTTP server — uses import.meta)"
+
+    # Inject file:// protocol info overlay for import.meta visualizations
+    # (e.g. orb). Shows helpful instructions instead of a blank page.
+    _inject_file_protocol_info "$dest/index.html" "$viz"
   fi
 
   # Remove source maps (not needed for demos)
