@@ -20,7 +20,7 @@ function renderLegend() {
     overlay = document.createElement('div');
     overlay.id = 'selection-legend';
     overlay.style.cssText =
-      'position:fixed;bottom:20px;left:20px;background:rgba(26,26,46,0.9);' +
+      'position:fixed;top:12px;left:12px;background:rgba(26,26,46,0.9);' +
       'border:1px solid #333;border-radius:8px;padding:12px 16px;color:#ccc;' +
       'font-family:sans-serif;font-size:13px;max-width:300px;pointer-events:none;z-index:10;';
     document.body.appendChild(overlay);
@@ -84,7 +84,8 @@ function render() {
     .backgroundColor(COLORS.background)
     .dagMode('td')
     .dagLevelDistance(180)
-    .d3VelocityDecay(0.3)
+    .d3VelocityDecay(0.45)
+    .d3AlphaMin(0.05)
     .graphData(graphData)
     // Node rendering
     .nodeCanvasObject((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
@@ -138,10 +139,20 @@ function render() {
       state = handleNodeClick(masterGraph, state, node.id as string);
       render();
     })
-    .cooldownTicks(150)
+    .cooldownTicks(120)
     .onEngineStop(() => {
-      graph.zoomToFit(300, 50);
+      graph.zoomToFit(300, 60);
     });
+
+  // Clamp node positions to prevent overshooting off-screen
+  graph.onEngineTick(() => {
+    const margin = 80;
+    const data = graph.graphData();
+    for (const node of data.nodes as any[]) {
+      if (node.x !== undefined) node.x = Math.max(-width + margin, Math.min(width - margin, node.x));
+      if (node.y !== undefined) node.y = Math.max(-height + margin, Math.min(height - margin, node.y));
+    }
+  });
 
   // Push nodes apart aggressively to avoid label overlap
   const charge = graph.d3Force('charge');
@@ -170,3 +181,22 @@ function render() {
 }
 
 render();
+
+// Fix compressed layout when opened in background tab: reheat and refit
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && currentGraph) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    currentGraph.width(w).height(h);
+    currentGraph.d3ReheatSimulation();
+    setTimeout(() => currentGraph?.zoomToFit(400, 60), 600);
+  }
+});
+
+// Also handle window resize
+window.addEventListener('resize', () => {
+  if (currentGraph) {
+    currentGraph.width(window.innerWidth).height(window.innerHeight);
+    currentGraph.zoomToFit(300, 60);
+  }
+});
