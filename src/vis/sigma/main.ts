@@ -179,6 +179,7 @@ renderLegend();
 renderer.on('clickNode', ({ node }) => {
   state = handleNodeClick(masterGraph, state, node);
   updateVisualization();
+  window.parent.postMessage({ type: 'node-clicked', nodeId: node }, '*');
 });
 
 // Expose for CDP testing
@@ -187,3 +188,11 @@ renderer.on('clickNode', ({ node }) => {
   state = handleNodeClick(masterGraph, state, nodeId);
   updateVisualization();
 };
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(masterGraph, state, e.data.nodeId);
+    updateVisualization();
+  }
+});

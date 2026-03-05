@@ -218,6 +218,7 @@ export default function App() {
   const onNodeClick = useCallback(
     (node: GraphNode) => {
       setState((prev) => handleNodeClick(masterGraph, prev, node.id));
+      window.parent.postMessage({ type: 'node-clicked', nodeId: node.id }, '*');
     },
     [],
   );
@@ -225,6 +226,7 @@ export default function App() {
   const onSvgNodeClick = useCallback(
     (nodeId: string) => {
       setState((prev) => handleNodeClick(masterGraph, prev, nodeId));
+      window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
     },
     [],
   );
@@ -236,6 +238,17 @@ export default function App() {
     };
     (window as any).__reagraphState = () => state;
   }, [state]);
+
+  // postMessage support for dual-all iframe embedding
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'sync-select' && e.data.nodeId) {
+        setState((prev) => handleNodeClick(masterGraph, prev, e.data.nodeId));
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
   return (
     <div

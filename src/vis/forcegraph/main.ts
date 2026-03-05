@@ -138,6 +138,7 @@ function render() {
     .onNodeClick((node: any) => {
       state = handleNodeClick(masterGraph, state, node.id as string);
       render();
+      window.parent.postMessage({ type: 'node-clicked', nodeId: node.id }, '*');
     })
     .cooldownTicks(120)
     .onEngineStop(() => {
@@ -198,5 +199,12 @@ window.addEventListener('resize', () => {
   if (currentGraph) {
     currentGraph.width(window.innerWidth).height(window.innerHeight);
     currentGraph.zoomToFit(300, 60);
+  }
+});
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    (window as any).__clickNode?.(e.data.nodeId);
   }
 });

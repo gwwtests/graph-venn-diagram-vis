@@ -143,6 +143,7 @@ orb.events.on(OrbEventType.NODE_CLICK, (event) => {
   const nodeId = event.node.data.id;
   state = handleNodeClick(masterGraph, state, nodeId);
   refreshVisualization();
+  window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
 });
 
 function refreshVisualization() {
@@ -160,3 +161,11 @@ function refreshVisualization() {
   state = handleNodeClick(masterGraph, state, nodeId);
   refreshVisualization();
 };
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(masterGraph, state, e.data.nodeId);
+    refreshVisualization();
+  }
+});

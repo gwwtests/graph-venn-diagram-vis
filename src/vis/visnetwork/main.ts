@@ -101,6 +101,7 @@ network.on('click', (params: { nodes: string[] }) => {
     const nodeId = params.nodes[0];
     state = handleNodeClick(masterGraph, state, nodeId);
     refresh();
+    window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
   }
 });
 
@@ -109,3 +110,11 @@ network.on('click', (params: { nodes: string[] }) => {
   state = handleNodeClick(masterGraph, state, nodeId);
   refresh();
 };
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(masterGraph, state, e.data.nodeId);
+    refresh();
+  }
+});

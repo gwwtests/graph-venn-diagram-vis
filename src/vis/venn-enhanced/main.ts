@@ -426,8 +426,10 @@ function render() {
         const doms = categoryDomains.get(c.id) || [];
         if (doms.length > 0) {
           const unsel = doms.find(d => !state.selectedDomains.has(d));
-          state = handleNodeClick(graph, state, unsel || doms[0]);
+          const nodeId = unsel || doms[0];
+          state = handleNodeClick(graph, state, nodeId);
           render();
+          window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
         }
       });
 
@@ -469,8 +471,10 @@ function render() {
         if (doms.size > 0) {
           const domArr = [...doms];
           const unsel = domArr.find(d => !state.selectedDomains.has(d));
-          state = handleNodeClick(graph, state, unsel || domArr[0]);
+          const nodeId = unsel || domArr[0];
+          state = handleNodeClick(graph, state, nodeId);
           render();
+          window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
         }
       });
 
@@ -502,6 +506,7 @@ function render() {
       if (domainId) {
         state = handleNodeClick(graph, state, domainId);
         render();
+        window.parent.postMessage({ type: 'node-clicked', nodeId: domainId }, '*');
       }
     });
 
@@ -516,6 +521,7 @@ function render() {
       if (domainId) {
         state = handleNodeClick(graph, state, domainId);
         render();
+        window.parent.postMessage({ type: 'node-clicked', nodeId: domainId }, '*');
       }
     });
 
@@ -602,4 +608,12 @@ let resizeTimer: ReturnType<typeof setTimeout>;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => render(), 100);
+});
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(graph, state, e.data.nodeId);
+    render();
+  }
 });

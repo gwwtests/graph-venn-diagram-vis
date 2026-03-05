@@ -213,6 +213,7 @@ function render() {
   nodeEnter.style('cursor', 'pointer').on('click', function (_event, d) {
     state = handleNodeClick(masterGraph, state, d.id);
     render();
+    window.parent.postMessage({ type: 'node-clicked', nodeId: d.id }, '*');
   });
 
   // Update + Enter
@@ -258,3 +259,11 @@ render();
   state = handleNodeClick(masterGraph, state, nodeId);
   render();
 };
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(masterGraph, state, e.data.nodeId);
+    render();
+  }
+});

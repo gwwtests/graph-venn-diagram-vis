@@ -29,6 +29,7 @@ function onStateChange(nodeId: string) {
   renderDag();
   renderVenn();
   renderEntityOverlay();
+  window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
 }
 
 function resetState() {
@@ -757,3 +758,10 @@ renderEntityOverlay();
 };
 (window as any).__dualClick = (nodeId: string) => onStateChange(nodeId);
 (window as any).__dualReset = () => resetState();
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    onStateChange(e.data.nodeId);
+  }
+});

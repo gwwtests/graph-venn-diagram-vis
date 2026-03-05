@@ -116,6 +116,7 @@ cy.on('tap', 'node', (evt) => {
   const nodeId = evt.target.id();
   state = handleNodeClick(masterGraph, state, nodeId);
   updateVisualization();
+  window.parent.postMessage({ type: 'node-clicked', nodeId }, '*');
 });
 
 // Expose for CDP testing
@@ -124,3 +125,11 @@ cy.on('tap', 'node', (evt) => {
   state = handleNodeClick(masterGraph, state, nodeId);
   updateVisualization();
 };
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(masterGraph, state, e.data.nodeId);
+    updateVisualization();
+  }
+});

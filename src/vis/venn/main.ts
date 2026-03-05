@@ -185,6 +185,7 @@ function render() {
       if (domainId) {
         state = handleNodeClick(graph, state, domainId);
         render();
+        window.parent.postMessage({ type: 'node-clicked', nodeId: domainId }, '*');
       }
     });
 
@@ -202,6 +203,7 @@ function render() {
       if (domainId) {
         state = handleNodeClick(graph, state, domainId);
         render();
+        window.parent.postMessage({ type: 'node-clicked', nodeId: domainId }, '*');
       }
     });
 
@@ -281,3 +283,11 @@ render();
 
 // Re-render on resize
 window.addEventListener('resize', () => render());
+
+// ─── postMessage support for dual-all iframe embedding ──────────────
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'sync-select' && e.data.nodeId) {
+    state = handleNodeClick(graph, state, e.data.nodeId);
+    render();
+  }
+});
