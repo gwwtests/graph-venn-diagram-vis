@@ -12,6 +12,43 @@ import type { GraphState } from '../shared';
 
 let state: GraphState = createEmptyState();
 
+/** Render/update the selection legend overlay */
+function renderLegend() {
+  let overlay = document.getElementById('selection-legend');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'selection-legend';
+    overlay.style.cssText =
+      'position:fixed;bottom:20px;left:20px;background:rgba(26,26,46,0.9);' +
+      'border:1px solid #333;border-radius:8px;padding:12px 16px;color:#ccc;' +
+      'font-family:sans-serif;font-size:13px;max-width:300px;pointer-events:none;z-index:10;';
+    document.body.appendChild(overlay);
+  }
+
+  const { nodes } = getVisState(masterGraph, state);
+  const selDomains = nodes.filter(n => n.tier === 'domain' && n.selected);
+  const selCategories = nodes.filter(n => n.tier === 'category' && n.selected);
+  const selEntities = nodes.filter(n => n.tier === 'entity' && n.selected);
+
+  if (selDomains.length === 0) {
+    overlay.innerHTML = '<span style="color:#666">Click a node to select it</span>';
+    return;
+  }
+
+  const domainList = selDomains.map(n =>
+    `<span style="color:${COLORS.domain.selected}">${n.label}</span>`).join(', ');
+  const catList = selCategories.map(n =>
+    `<span style="color:${COLORS.category.selected}">${n.label}</span>`).join(', ');
+  const entityList = selEntities.map(n =>
+    `${n.label} <span style="color:${COLORS.edge.active}">[${n.pathCount}]</span>`).join('<br>');
+
+  overlay.innerHTML = `
+    <div style="color:#fff;font-weight:bold;margin-bottom:4px">Selected: ${domainList}</div>
+    <div style="margin-bottom:4px;font-size:11px">Categories: ${catList || '<span style="color:#666">none</span>'}</div>
+    <div>${entityList || '<span style="color:#666">No entities active</span>'}</div>
+  `;
+}
+
 /** Compute dagre layout and return positions keyed by node id */
 function computeLayout(nodeIds: string[], edges: { from: string; to: string }[]): Map<string, { x: number; y: number }> {
   const g = new dagre.graphlib.Graph();
@@ -132,7 +169,11 @@ function updateVisualization() {
       graph.setEdgeAttribute(edgeKey, 'size', edge.active ? 2.5 : 1);
     }
   }
+
+  renderLegend();
 }
+
+renderLegend();
 
 // Handle clicks
 renderer.on('clickNode', ({ node }) => {
