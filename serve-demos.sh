@@ -2,13 +2,13 @@
 # Serve visualization demos for side-by-side comparison
 #
 # Usage:
-#   ./serve-demos.sh              Serve all 10 visualizations (7 DAG + 2 Venn + 1 Dual-v1)
+#   ./serve-demos.sh              Serve all 11 visualizations (7 DAG + 2 Venn + 2 Dual)
 #   ./serve-demos.sh cytoscape    Serve only cytoscape
 #   ./serve-demos.sh venn         Serve only venn diagram
 #   ./serve-demos.sh stop         Stop all demo servers
 #   ./serve-demos.sh list         Show available demos
 #
-# Each visualization runs on its own port (4201-4210).
+# Each visualization runs on its own port (4201-4211).
 # Click domain nodes/circles to see path count propagation.
 
 set -e
@@ -27,6 +27,7 @@ declare -A PORTS=(
   [venn]=4208
   [dual-v1]=4209
   [venn-enhanced]=4210
+  [dual-all]=4211
 )
 
 declare -A LABELS=(
@@ -40,9 +41,10 @@ declare -A LABELS=(
   [venn]="Venn Diagram (upsetjs/venn.js)"
   [dual-v1]="Dual Panel v1 (DAG + Venn synchronized)"
   [venn-enhanced]="Enhanced Venn (domains + categories + entities)"
+  [dual-all]="Dual Panel All (any renderer, iframe-based)"
 )
 
-ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn dual-v1 venn-enhanced)
+ALL_LIBS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn dual-v1 venn-enhanced dual-all)
 
 cmd_list() {
   echo "Available visualization demos:"

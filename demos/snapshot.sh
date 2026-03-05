@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # All visualization targets (must match vite.{name}.config.ts)
-ALL_VIZS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn venn-enhanced dual-v1)
+ALL_VIZS=(cytoscape d3dag forcegraph orb reagraph sigma visnetwork venn venn-enhanced dual-v1 dual-all)
 
 declare -A LABELS=(
   [cytoscape]="Cytoscape.js + dagre"
@@ -26,6 +26,7 @@ declare -A LABELS=(
   [venn]="Venn Diagram (upsetjs/venn.js)"
   [venn-enhanced]="Enhanced Venn (domains + categories + entities)"
   [dual-v1]="Dual Panel v1 (DAG + Venn synchronized)"
+  [dual-all]="Dual Panel All (any renderer, iframe-based)"
 )
 
 # Inject file:// protocol info overlay into an HTML file.
