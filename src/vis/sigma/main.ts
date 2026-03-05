@@ -62,7 +62,7 @@ function buildGraph(): Graph {
 
     graph.addNode(node.id, {
       x: pos.x,
-      y: pos.y,
+      y: -pos.y,
       size: node.tier === 'domain' ? 18 : node.tier === 'category' ? 14 : 10,
       color: bgColor,
       label: displayLabel,
