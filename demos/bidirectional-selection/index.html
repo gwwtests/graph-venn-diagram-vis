@@ -10,10 +10,14 @@
     h1 { color: #00d4ff; margin-bottom: 0.5rem; }
     .meta { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    .card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 1.2rem;
-            text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.1s; }
+    .card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+            text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.1s;
+            overflow: hidden; }
     .card:hover { border-color: #00d4ff; transform: translateY(-2px); }
-    .card h2 { color: #00d4ff; font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .card img { width: 100%; height: 160px; object-fit: cover; display: block;
+                border-bottom: 1px solid #0f3460; }
+    .card .info { padding: 0.8rem 1rem; }
+    .card h2 { color: #00d4ff; font-size: 1.1rem; margin-bottom: 0.3rem; }
     .card p { color: #aaa; font-size: 0.85rem; }
     .back { display: inline-block; margin-bottom: 1.5rem; color: #00d4ff; text-decoration: none; }
     .back:hover { text-decoration: underline; }
@@ -25,44 +29,81 @@
   <p class="meta">Created 2026-03-05 &middot; cad26b1</p>
   <div class="grid">
     <a class="card" href="./cytoscape/index.html">
-      <h2>cytoscape</h2>
-      <p>Cytoscape.js + dagre</p>
+      <img src="./thumbnails/cytoscape.png" alt="cytoscape preview" loading="lazy">
+      <div class="info">
+        <h2>cytoscape</h2>
+        <p>Cytoscape.js + dagre</p>
+      </div>
     </a>
     <a class="card" href="./d3dag/index.html">
-      <h2>d3dag</h2>
-      <p>D3.js + d3-dag (Sugiyama)</p>
+      <img src="./thumbnails/d3dag.png" alt="d3dag preview" loading="lazy">
+      <div class="info">
+        <h2>d3dag</h2>
+        <p>D3.js + d3-dag (Sugiyama)</p>
+      </div>
     </a>
     <a class="card" href="./forcegraph/index.html">
-      <h2>forcegraph</h2>
-      <p>force-graph (vasturiano)</p>
+      <img src="./thumbnails/forcegraph.png" alt="forcegraph preview" loading="lazy">
+      <div class="info">
+        <h2>forcegraph</h2>
+        <p>force-graph (vasturiano)</p>
+      </div>
     </a>
     <a class="card" href="./orb/index.html">
-      <h2>orb</h2>
-      <p>@memgraph/orb + dagre <em style="color:#e6a800;">(HTTP server required)</em></p>
+      <img src="./thumbnails/orb.png" alt="orb preview" loading="lazy">
+      <div class="info">
+        <h2>orb</h2>
+        <p>@memgraph/orb + dagre <em style="color:#e6a800;">(HTTP server required)</em></p>
+      </div>
     </a>
     <a class="card" href="./reagraph/index.html">
-      <h2>reagraph</h2>
-      <p>reagraph (WebGL/React)</p>
+      <img src="./thumbnails/reagraph.png" alt="reagraph preview" loading="lazy">
+      <div class="info">
+        <h2>reagraph</h2>
+        <p>reagraph (WebGL/React)</p>
+      </div>
     </a>
     <a class="card" href="./sigma/index.html">
-      <h2>sigma</h2>
-      <p>Sigma.js v3 + graphology</p>
+      <img src="./thumbnails/sigma.png" alt="sigma preview" loading="lazy">
+      <div class="info">
+        <h2>sigma</h2>
+        <p>Sigma.js v3 + graphology</p>
+      </div>
     </a>
     <a class="card" href="./visnetwork/index.html">
-      <h2>visnetwork</h2>
-      <p>vis-network (hierarchical)</p>
+      <img src="./thumbnails/visnetwork.png" alt="visnetwork preview" loading="lazy">
+      <div class="info">
+        <h2>visnetwork</h2>
+        <p>vis-network (hierarchical)</p>
+      </div>
     </a>
     <a class="card" href="./venn/index.html">
-      <h2>venn</h2>
-      <p>Venn Diagram (upsetjs/venn.js)</p>
+      <img src="./thumbnails/venn.png" alt="venn preview" loading="lazy">
+      <div class="info">
+        <h2>venn</h2>
+        <p>Venn Diagram (upsetjs/venn.js)</p>
+      </div>
     </a>
     <a class="card" href="./venn-enhanced/index.html">
-      <h2>venn-enhanced</h2>
-      <p>Enhanced Venn (domains + categories + entities)</p>
+      <img src="./thumbnails/venn-enhanced.png" alt="venn-enhanced preview" loading="lazy">
+      <div class="info">
+        <h2>venn-enhanced</h2>
+        <p>Enhanced Venn (domains + categories + entities)</p>
+      </div>
     </a>
     <a class="card" href="./dual-v1/index.html">
-      <h2>dual-v1</h2>
-      <p>Dual Panel v1 (DAG + Venn synchronized)</p>
+      <img src="./thumbnails/dual-v1.png" alt="dual-v1 preview" loading="lazy">
+      <div class="info">
+        <h2>dual-v1</h2>
+        <p>Dual Panel v1 (DAG + Venn synchronized)</p>
+      </div>
+    </a>
+    <a class="card" href="./dual-all/index.html">
+      <img src="./thumbnails/dual-all.png" alt="dual-all preview" loading="lazy">
+      <div class="info">
+        <h2>dual-all</h2>
+        <p>Dual Panel &mdash; switchable renderers (any + any)</p>
+      </div>
     </a>
   </div>
 </body>
