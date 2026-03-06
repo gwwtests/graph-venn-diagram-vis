@@ -201,10 +201,14 @@ cat > "$SNAP_DIR/index.html" << 'HEADER'
     h1 { color: #00d4ff; margin-bottom: 0.5rem; }
     .meta { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    .card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 1.2rem;
-            text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.1s; }
+    .card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+            text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.1s;
+            overflow: hidden; }
     .card:hover { border-color: #00d4ff; transform: translateY(-2px); }
-    .card h2 { color: #00d4ff; font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .card img { width: 100%; height: 160px; object-fit: cover; display: block;
+                border-bottom: 1px solid #0f3460; }
+    .card .info { padding: 0.8rem 1rem; }
+    .card h2 { color: #00d4ff; font-size: 1.1rem; margin-bottom: 0.3rem; }
     .card p { color: #aaa; font-size: 0.85rem; }
     .back { display: inline-block; margin-bottom: 1.5rem; color: #00d4ff; text-decoration: none; }
     .back:hover { text-decoration: underline; }
@@ -224,10 +228,21 @@ EOF
 for viz in "${ALL_VIZS[@]}"; do
   if [ -d "$SNAP_DIR/$viz" ]; then
     label="${LABELS[$viz]}"
+    thumb_img=""
+    if [ -f "$SNAP_DIR/thumbnails/$viz.png" ]; then
+      thumb_img="      <img src=\"./thumbnails/$viz.png\" alt=\"$viz preview\" loading=\"lazy\">"
+    fi
+    http_note=""
+    if [ "$has_import_meta" = true ] 2>/dev/null && grep -rql 'import\.meta' "$SNAP_DIR/$viz/assets/" 2>/dev/null; then
+      http_note=" <em style=\"color:#e6a800;\">(HTTP server required)</em>"
+    fi
     cat >> "$SNAP_DIR/index.html" << EOF
     <a class="card" href="./$viz/index.html">
-      <h2>$viz</h2>
-      <p>$label</p>
+$thumb_img
+      <div class="info">
+        <h2>$viz</h2>
+        <p>$label$http_note</p>
+      </div>
     </a>
 EOF
   fi
