@@ -60,16 +60,27 @@ const visState = getVisState(masterGraph, state);
 const nodesDS = new DataSet(visState.nodes.map(n => buildNodeData(n)));
 const edgesDS = new DataSet(visState.edges.map((e, i) => buildEdgeData(e, i)));
 
-const network = new Network(container, { nodes: nodesDS, edges: edgesDS }, {
-  layout: {
+// Compute level separation to use available height (3 tiers = 2 gaps)
+function computeLevelSep() {
+  const h = container.clientHeight;
+  // Reserve ~30% for node sizes + padding, split rest into 2 gaps
+  return Math.max(80, Math.floor(h * 0.7 / 2));
+}
+
+function getLayoutOptions() {
+  return {
     hierarchical: {
-      direction: 'UD',
-      sortMethod: 'directed',
-      levelSeparation: 120,
+      direction: 'UD' as const,
+      sortMethod: 'directed' as const,
+      levelSeparation: computeLevelSep(),
       nodeSpacing: 100,
       treeSpacing: 80,
     },
-  },
+  };
+}
+
+const network = new Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  layout: getLayoutOptions(),
   physics: false,
   interaction: {
     hover: true,
@@ -82,6 +93,20 @@ const network = new Network(container, { nodes: nodesDS, edges: edgesDS }, {
   edges: {
     smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 },
   },
+});
+
+// Fit graph to container after initial draw
+network.once('afterDrawing', () => network.fit({ animation: false }));
+
+// Re-layout and fit on resize
+let resizeTimer: ReturnType<typeof setTimeout>;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    network.setSize(container.clientWidth + 'px', container.clientHeight + 'px');
+    network.setOptions({ layout: getLayoutOptions() });
+    network.fit();
+  }, 150);
 });
 
 function refresh() {

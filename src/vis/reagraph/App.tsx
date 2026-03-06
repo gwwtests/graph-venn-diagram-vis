@@ -39,12 +39,14 @@ function nodeLabel(node: VisNode): string {
 function SvgOverlay({
   vis,
   onNodeClick,
+  containerSize,
 }: {
   vis: ReturnType<typeof getVisState>;
   onNodeClick: (nodeId: string) => void;
+  containerSize: { width: number; height: number };
 }) {
-  const width = 1024;
-  const height = 768;
+  const width = containerSize.width || 1024;
+  const height = containerSize.height || 768;
   const rowHeight = height / 4;
   const padding = 60;
 
@@ -157,6 +159,18 @@ function SvgOverlay({
 export default function App() {
   const [state, setState] = useState<GraphState>(createEmptyState);
   const [webglFailed, setWebglFailed] = useState(false);
+  const [containerSize, setContainerSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Track container size for responsive SVG overlay
+  useEffect(() => {
+    const onResize = () =>
+      setContainerSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Detect WebGL availability
   useEffect(() => {
@@ -261,7 +275,7 @@ export default function App() {
     >
       {/* SVG overlay for headless/screenshot or WebGL fallback */}
       {webglFailed && (
-        <SvgOverlay vis={vis} onNodeClick={onSvgNodeClick} />
+        <SvgOverlay vis={vis} onNodeClick={onSvgNodeClick} containerSize={containerSize} />
       )}
       {/* WebGL canvas (renders behind SVG overlay if present) */}
       {!webglFailed && (

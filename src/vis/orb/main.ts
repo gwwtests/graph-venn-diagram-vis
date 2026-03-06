@@ -155,6 +155,9 @@ function refreshVisualization() {
   });
 }
 
+// Re-fit on resize
+window.addEventListener('resize', () => orb.view.recenter());
+
 // Expose for CDP testing
 (window as any).__orbState = () => state;
 (window as any).__orbClick = (nodeId: string) => {

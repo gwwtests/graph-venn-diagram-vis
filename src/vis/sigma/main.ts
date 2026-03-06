@@ -130,7 +130,7 @@ const renderer = new Sigma(graph, container, {
   labelColor: { color: COLORS.text.selected },
   labelRenderedSizeThreshold: 0,
   defaultNodeColor: COLORS.category.unselected,
-  stagePadding: 40,
+  stagePadding: 80,
   nodeReducer: (node, data) => {
     return {
       ...data,
@@ -181,6 +181,9 @@ renderer.on('clickNode', ({ node }) => {
   updateVisualization();
   window.parent.postMessage({ type: 'node-clicked', nodeId: node }, '*');
 });
+
+// Re-render on resize
+window.addEventListener('resize', () => renderer.refresh());
 
 // Expose for CDP testing
 (window as any).__sigmaState = () => state;

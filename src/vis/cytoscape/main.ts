@@ -58,8 +58,27 @@ function buildElements() {
   return elements;
 }
 
+const cyContainer = document.getElementById('cy')!;
+
+// Compute rankSep to use available height (3 tiers = 2 gaps)
+function computeRankSep() {
+  const h = cyContainer.clientHeight;
+  // Reserve ~30% for node sizes + padding, split rest into 2 gaps
+  return Math.max(60, Math.floor(h * 0.7 / 2));
+}
+
+function getDagreLayout() {
+  return {
+    name: 'dagre',
+    rankDir: 'TB',
+    nodeSep: 60,
+    rankSep: computeRankSep(),
+    padding: 30,
+  } as any;
+}
+
 const cy = cytoscape({
-  container: document.getElementById('cy'),
+  container: cyContainer,
   elements: buildElements(),
   style: [
     {
@@ -90,27 +109,31 @@ const cy = cytoscape({
       },
     },
   ],
-  layout: {
-    name: 'dagre',
-    rankDir: 'TB',
-    nodeSep: 60,
-    rankSep: 80,
-    padding: 30,
-  } as any,
+  layout: getDagreLayout(),
 });
 
 function updateVisualization() {
   const elements = buildElements();
   cy.json({ elements });
-  const layout = cy.layout({
-    name: 'dagre',
-    rankDir: 'TB',
-    nodeSep: 60,
-    rankSep: 80,
-    padding: 30,
-  } as any);
+  const layout = cy.layout(getDagreLayout());
+  layout.one('layoutstop', () => cy.fit(undefined, 20));
   layout.run();
 }
+
+// Fit after initial layout
+cy.one('layoutstop', () => cy.fit(undefined, 20));
+
+// Re-layout and fit on resize
+let cyResizeTimer: ReturnType<typeof setTimeout>;
+window.addEventListener('resize', () => {
+  clearTimeout(cyResizeTimer);
+  cyResizeTimer = setTimeout(() => {
+    cy.resize();
+    const layout = cy.layout(getDagreLayout());
+    layout.one('layoutstop', () => cy.fit(undefined, 20));
+    layout.run();
+  }, 150);
+});
 
 cy.on('tap', 'node', (evt) => {
   const nodeId = evt.target.id();

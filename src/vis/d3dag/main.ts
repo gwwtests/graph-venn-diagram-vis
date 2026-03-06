@@ -253,6 +253,9 @@ function render() {
 // Initial render
 render();
 
+// Re-render on resize (getScale() reads container dimensions dynamically)
+window.addEventListener('resize', () => render());
+
 // Expose for CDP testing
 (window as any).__d3dagState = () => state;
 (window as any).__d3dagClick = (nodeId: string) => {
