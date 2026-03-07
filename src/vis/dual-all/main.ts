@@ -60,9 +60,25 @@ function populateSelect(select: HTMLSelectElement, defaultValue: string) {
 populateSelect(selectLeft, DEFAULT_LEFT);
 populateSelect(selectRight, DEFAULT_RIGHT);
 
-// Load iframe
-function loadIframe(iframe: HTMLIFrameElement, vizId: string) {
+// ─── Click history for state replay on panel switch ──────────────────
+// Every node-clicked event is recorded so we can replay into a fresh iframe.
+const clickHistory: string[] = [];
+
+// Load iframe, optionally replaying click history after it loads
+function loadIframe(iframe: HTMLIFrameElement, vizId: string, replay = false) {
   const url = resolveVizUrl(vizId);
+  if (replay && clickHistory.length > 0) {
+    const handler = () => {
+      iframe.removeEventListener('load', handler);
+      // Brief delay to let the viz JS initialize before sending messages
+      setTimeout(() => {
+        for (const nodeId of clickHistory) {
+          iframe.contentWindow?.postMessage({ type: 'sync-select', nodeId }, '*');
+        }
+      }, 300);
+    };
+    iframe.addEventListener('load', handler);
+  }
   iframe.src = url;
 }
 
@@ -70,12 +86,12 @@ function loadIframe(iframe: HTMLIFrameElement, vizId: string) {
 loadIframe(iframeLeft, DEFAULT_LEFT);
 loadIframe(iframeRight, DEFAULT_RIGHT);
 
-// Dropdown change handlers
+// Dropdown change handlers — replay click history into the new panel
 selectLeft.addEventListener('change', () => {
-  loadIframe(iframeLeft, selectLeft.value);
+  loadIframe(iframeLeft, selectLeft.value, true);
 });
 selectRight.addEventListener('change', () => {
-  loadIframe(iframeRight, selectRight.value);
+  loadIframe(iframeRight, selectRight.value, true);
 });
 
 // ─── postMessage relay for selection sync ────────────────────────────
@@ -90,6 +106,9 @@ window.addEventListener('message', (e) => {
   const nodeId = e.data.nodeId;
   if (!nodeId) return;
 
+  // Record click for replay when switching panels
+  clickHistory.push(nodeId);
+
   relaying = true;
 
   // Determine which iframe sent the message, relay to the other
@@ -103,8 +122,9 @@ window.addEventListener('message', (e) => {
   relaying = false;
 });
 
-// Reset button: reload both iframes to clear state
+// Reset button: reload both iframes and clear click history
 btnReset.addEventListener('click', () => {
+  clickHistory.length = 0;
   loadIframe(iframeLeft, selectLeft.value);
   loadIframe(iframeRight, selectRight.value);
 });
